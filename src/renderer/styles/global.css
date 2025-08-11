@@ -1,0 +1,69 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* CSS Custom Properties for Theme Variables */
+:root {
+  /* Light Theme - Teal/Turquoise Primary Colors */
+  --color-primary-50: #f0fdfa;
+  --color-primary-100: #ccfbf1;
+  --color-primary-200: #99f6e4;
+  --color-primary-300: #5eead4;
+  --color-primary-400: #2dd4bf;
+  --color-primary-500: #14b8a6;
+  --color-primary-600: #0d9488;
+  --color-primary-700: #0f766e;
+  --color-primary-800: #115e59;
+  --color-primary-900: #134e4a;
+
+  /* Light Theme - Background Colors */
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f9fafb;
+
+  /* Light Theme - Text Colors */
+  --color-text-primary: #111827;
+  --color-text-secondary: #4b5563;
+
+  /* Light Theme - Interactive Colors */
+  --color-hover: #f3f4f6;
+  --color-close-hover: #ef4444;
+  --color-close-hover-text: #ffffff;
+}
+
+.dark {
+  /* Dark Theme - Teal/Turquoise Primary Colors (Adjusted for dark mode) */
+  --color-primary-50: #134e4a;
+  --color-primary-100: #115e59;
+  --color-primary-200: #0f766e;
+  --color-primary-300: #0d9488;
+  --color-primary-400: #14b8a6;
+  --color-primary-500: #2dd4bf;
+  --color-primary-600: #5eead4;
+  --color-primary-700: #99f6e4;
+  --color-primary-800: #ccfbf1;
+  --color-primary-900: #f0fdfa;
+
+  /* Dark Theme - Background Colors */
+  --color-bg-primary: #111827;
+  --color-bg-secondary: #1f2937;
+
+  /* Dark Theme - Text Colors */
+  --color-text-primary: #f9fafb;
+  --color-text-secondary: #9ca3af;
+
+  /* Dark Theme - Interactive Colors */
+  --color-hover: #374151;
+  --color-close-hover: #dc2626;
+  --color-close-hover-text: #ffffff;
+}
+
+/* Custom styles for electron window dragging */
+.drag {
+  -webkit-app-region: drag;
+}
+
+.no-drag {
+  -webkit-app-region: no-drag;
+}
+
+/* Title bar specific styles using CSS custom properties */
