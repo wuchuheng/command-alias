@@ -1,8 +1,8 @@
-# Spaceboot Software Design Document
+# SpaceTrigger Software Design Document
 
 ## 1. Introduction
 
-Spaceboot is a cross-platform keyboard shortcut launcher application inspired by Spacelauncher for macOS. The application allows users to configure custom keyboard sequences to rapidly launch applications, execute commands, and streamline workflows.
+SpaceTrigger is a cross-platform keyboard shortcut launcher application inspired by SpaceTrigger for macOS. The application allows users to configure custom keyboard sequences to rapidly launch applications, execute commands, and streamline workflows.
 
 ### Core Features
 
@@ -96,7 +96,7 @@ Example binding:
        │      └─── UI Events ────────┘       │
        │                                      │
 ┌──────────────────────┐             ┌──────────────────────┐
-│   Spaceboot UI       │             │   Spaceboot Services │
+│   SpaceTrigger UI       │             │   SpaceTrigger Services │
 │   Components         │             │   & Business Logic   │
 └──────────────────────┘             └──────────────────────┘
                                               │
@@ -119,7 +119,7 @@ Example binding:
 ### 2.3 Process Communication
 
 1. **Renderer → Main**:
-   - User interactions trigger IPC calls via `window.electron.spaceboot` API
+   - User interactions trigger IPC calls via `window.electron.SpaceTrigger` API
    - Requests are routed through preload script to main process
 2. **Main → Renderer**:
    - Service layer processes requests and returns data/responses
@@ -138,7 +138,7 @@ The interface declaration in `src/types/electron.d.ts` serves as the foundationa
 declare global {
   interface Window {
     electron: {
-      spaceboot: {
+      SpaceTrigger: {
         // Core Methods
         setDelay: (delay: number) => Promise<void>;
         getKeyBindings: () => Promise<KeyBinding[]>;
@@ -162,21 +162,21 @@ Implementation in `src/shared/config.ts`:
 
 ```ts
 export const config: StrictConfig = {
-  spaceboot: {
-    setDelay: createIpcChannel<number, void>('spaceboot/setDelay'),
-    getKeyBindings: createIpcChannel<void, KeyBinding[]>('spaceboot/getKeyBindings'),
-    addBinding: createIpcChannel<Omit<KeyBinding, 'id'>, KeyBinding>('spaceboot/addBinding'),
-    onSequenceUpdate: createSubscriptionChannel<string[]>('spaceboot/onSequenceUpdate'),
+  SpaceTrigger: {
+    setDelay: createIpcChannel<number, void>('SpaceTrigger/setDelay'),
+    getKeyBindings: createIpcChannel<void, KeyBinding[]>('SpaceTrigger/getKeyBindings'),
+    addBinding: createIpcChannel<Omit<KeyBinding, 'id'>, KeyBinding>('SpaceTrigger/addBinding'),
+    onSequenceUpdate: createSubscriptionChannel<string[]>('SpaceTrigger/onSequenceUpdate'),
   },
 };
 ```
 
 ### 3.3 Service Layer
 
-Business logic implementation (`src/main/services/spaceboot.service.ts`):
+Business logic implementation (`src/main/services/SpaceTrigger.service.ts`):
 
 ```ts
-class SpacebootService {
+class SpaceTriggerService {
   private activationDelay = 300;
   private keyBindings: KeyBinding[] = [];
 
@@ -197,13 +197,13 @@ class SpacebootService {
 
 ### 3.4 IPC Handlers
 
-Connection between config and services (`src/main/ipc/spaceboot.ipc.ts`):
+Connection between config and services (`src/main/ipc/SpaceTrigger.ipc.ts`):
 
 ```ts
 // Handle delay configuration
-config.spaceboot.setDelay.handle(async delay => {
+config.SpaceTrigger.setDelay.handle(async delay => {
   try {
-    await spacebootService.setDelay(delay);
+    await SpaceTriggerService.setDelay(delay);
   } catch (error) {
     logger.error('Failed to set delay', error);
     throw error;
@@ -222,7 +222,7 @@ function useKeyBindings() {
   useEffect(() => {
     const loadBindings = async () => {
       try {
-        const data = await window.electron.spaceboot.getKeyBindings();
+        const data = await window.electron.SpaceTrigger.getKeyBindings();
         setBindings(data);
       } catch (error) {
         console.error('Failed to load bindings', error);
@@ -237,7 +237,7 @@ function useKeyBindings() {
 
 ## 4. User Interface Interaction Flow
 
-Spaceboot features two core interfaces that facilitate distinct user interactions:
+SpaceTrigger features two core interfaces that facilitate distinct user interactions:
 
 ### 4.1 Dashboard UI (Configuration Interface)
 
@@ -257,7 +257,7 @@ Spaceboot features two core interfaces that facilitate distinct user interaction
 **Visual Representation**:
 
 ```
-╔═══════════════════════════ Spaceboot ═════════════════════╗
+╔═══════════════════════════ SpaceTrigger ═════════════════════╗
 ║                                                           ║
 ║  Key Bindings                                             ║
 ║  ┌───────────────┬───────────────┬──────────────────────┐ ║
@@ -290,7 +290,7 @@ Spaceboot features two core interfaces that facilitate distinct user interaction
 **Visual Representation**:
 
 ```
-          ╔════════════════ Spaceboot ═══════════════╗
+          ╔════════════════ SpaceTrigger ═══════════════╗
           ║                                          ║
           ║  Type to filter commands...              ║
           ║                                          ║
