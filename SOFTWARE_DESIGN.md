@@ -319,3 +319,48 @@ or                   │
 Completes sequence   ▶ Executes command
                      ▶ Closes Notice UI
 ```
+
+````markdown
+## 5. Data Model Specification
+
+### 5.1 KeyBinding Entity
+
+```ts
+@Entity()
+export class KeyBinding {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column({ type: 'varchar', length: 50 })
+  sequence: string; // Formatted as "c o d e"
+
+  @Column({ type: 'varchar', length: 20 })
+  actionType: 'launch-app' | 'run-command' | 'execute-script';
+
+  @Column({ type: 'text' })
+  target: string; // Path or command
+
+  @Column({ type: 'text', nullable: true })
+  comment?: string;
+}
+```
+````
+
+### 5.2 AppConfig Entity
+
+```ts
+@Entity()
+export class AppConfig {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column({ type: 'varchar', length: 20, default: 'Space' })
+  prefixKey: string;
+
+  @Column({ type: 'int', default: 500 })
+  activationDelay: number; // ms
+
+  @Column({ type: 'varchar', default: 'dark' })
+  uiTheme: 'light' | 'dark';
+}
+```
