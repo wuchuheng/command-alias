@@ -1,5 +1,4 @@
 import { Welcome } from 'src/main/database/entities/welcom';
-import { KeyBinding } from '@/main/database/entities/KeyBinding';
 import { BootloadingProgressing } from '../types/electron';
 import { StrictConfig } from './config-utils';
 import { createIpcChannel } from './ipc-channel';
@@ -19,13 +18,5 @@ export const config: StrictConfig = {
   },
   welcome: {
     getWelcome: createIpcChannel<void, Welcome>('welcome/getWelcome'),
-  },
-
-  // Spaceboot domain
-  spaceboot: {
-    setDelay: createIpcChannel<number, void>('spaceboot/setDelay'),
-    getKeyBindings: createIpcChannel<void, KeyBinding[]>('spaceboot/getKeyBindings'),
-    addBinding: createIpcChannel<Omit<KeyBinding, 'id'>, KeyBinding>('spaceboot/addBinding'),
-    onSequenceUpdate: createSubscriptionChannel<string[]>('spaceboot/onSequenceUpdate'),
   },
 };
