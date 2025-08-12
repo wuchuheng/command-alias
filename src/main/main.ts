@@ -3,6 +3,7 @@ import { setupAllIpcHandlers } from './ipc';
 import { createWindow } from './windows/windowFactory';
 import { bootload } from './services/bootload.service';
 import { initDB } from './database/data-source';
+import { GlobalKeyboardService } from './services/global-keyboard.service';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -27,6 +28,15 @@ app.on('ready', async () => {
   // 2.3 Bootload the application
   bootload.register({ title: 'Initializing Database ...', load: initDB });
   await bootload.boot();
+
+  // 2.4 Register global keyboard handlers
+  const globalKeyboardService = new GlobalKeyboardService();
+  globalKeyboardService.registerSpaceKeyHandler();
+
+  // Cleanup on quit
+  app.on('will-quit', () => {
+    globalKeyboardService.unregisterSpaceKeyHandler();
+  });
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common

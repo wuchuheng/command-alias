@@ -1,8 +1,6 @@
 import { logger } from '../utils/logger';
 import { getDataSource } from './data-source';
 import { Welcome } from './entities/welcom';
-import { AppConfig } from './entities/AppConfig';
-import { KeyBinding } from './entities/KeyBinding';
 
 /**
  * Seed data for the welcome table
@@ -53,30 +51,6 @@ export const seedDatabase = async (): Promise<void> => {
 
     // Add all seeding functions here
     await seedBucketTable();
-
-    // Ensure AppConfig exists
-    const ds = getDataSource();
-    const appCfgRepo = ds.getRepository(AppConfig);
-    const hasCfg = await appCfgRepo.count();
-    if (!hasCfg) {
-      const cfg = appCfgRepo.create({ prefixKey: 'Space', activationDelay: 500, uiTheme: 'dark' });
-      await appCfgRepo.save(cfg);
-      logger.info('Seeded default AppConfig');
-    }
-
-    // Optional: seed a sample key binding if none exists
-    const kbRepo = ds.getRepository(KeyBinding);
-    const kbCount = await kbRepo.count();
-    if (!kbCount) {
-      const sample = kbRepo.create({
-        sequence: 'c o d e',
-        actionType: 'launch-app',
-        target: 'C:\\Program Files\\Microsoft VS Code\\Code.exe',
-        comment: 'Launch Visual Studio Code',
-      });
-      await kbRepo.save(sample);
-      logger.info('Seeded sample KeyBinding');
-    }
 
     logger.info('Database seeding completed successfully');
   } catch (error) {
