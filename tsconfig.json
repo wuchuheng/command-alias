@@ -13,11 +13,20 @@
     "resolveJsonModule": true,
     "jsx": "react-jsx",
     "paths": {
-      "src/*": ["src/*"],
-      "*": ["node_modules/*"]
+      "src/*": [
+        "src/*"
+      ],
+      "@/*": [
+        "src/*"
+      ],
+      "*": [
+        "node_modules/*"
+      ]
     },
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true
   },
-  "include": ["src/**/*"]
+  "include": [
+    "src/**/*"
+  ]
 }

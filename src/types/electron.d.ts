@@ -1,4 +1,5 @@
 import { Welcome } from 'src/main/database/entities/welcom';
+import { KeyBinding } from '@/main/database/entities/KeyBinding';
 
 export type Pagination<T> = {
   page: number;
@@ -58,6 +59,32 @@ declare global {
        */
       welcome: {
         getWelcome: () => Promise<Welcome>;
+      };
+
+      /**
+       * Spaceboot domain API for key binding and realtime sequence updates.
+       */
+      spaceboot: {
+        /**
+         * Set activation delay (ms).
+         */
+        setDelay: (delay: number) => Promise<void>;
+
+        /**
+         * Get all configured key bindings.
+         */
+        getKeyBindings: () => Promise<KeyBinding[]>;
+
+        /**
+         * Add a new key binding.
+         */
+        addBinding: (binding: Omit<KeyBinding, 'id'>) => Promise<KeyBinding>;
+
+        /**
+         * Subscribe to sequence update stream.
+         * @returns unsubscribe function
+         */
+        onSequenceUpdate: (callback: (sequence: string[]) => void) => () => void;
       };
     };
   }
