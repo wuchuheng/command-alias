@@ -65,6 +65,32 @@ export default function CommandPalette() {
     await window.electron.spaceTrigger.toggleApp(matchedHotkey.id);
   };
 
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, [inputRef]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        window.electron.spaceTrigger.hideCommandPalette();
+        setFilter('');
+        return;
+      }
+
+      // If the input is not focused, then make it and focus
+      if (document.activeElement !== inputRef.current) {
+        inputRef.current?.focus();
+      }
+    };
+    // Listen any key input.
+    globalThis.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      globalThis.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [inputRef]);
+
   return (
     <div
       className="w-full max-w-3xl overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900"
@@ -74,6 +100,7 @@ export default function CommandPalette() {
     >
       <input
         type="text"
+        ref={inputRef}
         className="w-full border-b border-gray-200 bg-transparent p-4 text-gray-900 placeholder-gray-400 outline-none dark:border-gray-700 dark:text-gray-100"
         placeholder="Type to filter commands..."
         value={filter}
@@ -119,42 +146,33 @@ export default function CommandPalette() {
 }
 
 type KeyCapProps = {
-  /** Key label to render, e.g., "C" */
   label: string;
-  /** True when this key has been typed already (active/confirmed). */
   isActive?: boolean;
 };
 
 /**
  * Renders a compact keycap, styled to resemble a keyboard key.
- * Highlights keys already typed only (no next-key hint).
  */
-const KeyCap: React.FC<KeyCapProps> = ({ label, isActive = false }) => {
-  // 2. Core processing: choose style based on state
-  const base =
-    'inline-flex min-w-[1rem] items-center justify-center rounded border px-1 font-mono text-xs leading-5 shadow-sm';
-  const inactive = 'border-gray-300 bg-gray-100 text-gray-800 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100';
-  const active = 'border-gray-500 bg-gray-200 text-gray-900 dark:border-gray-500 dark:bg-gray-700 dark:text-gray-100';
-
-  // 3. Output handling: render styled key label
-  return <span className={`${base} ${isActive ? active : inactive}`}>{label}</span>;
+const KeyCap: React.FC<KeyCapProps> = ({ label }) => {
+  // 3. Output handling: present a styled key label
+  return (
+    <span className="inline-flex min-w-[1rem] items-center justify-center rounded border border-gray-300 bg-gray-100 px-1 font-mono text-xs leading-5 text-gray-800 shadow-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
+      {label}
+    </span>
+  );
 };
 
 type ShortcutsProps = {
-  /** Full shortcut sequence, e.g., "c o d e" */
   value: string;
-  /** Raw user input so far (may include spaces) */
   currentInputChar: string;
 };
 
 /**
- * ShortcutRender displays a sequence like "c o d e" as individual keycaps, highlighting
- * already-typed keys and hinting the next key.
+ * ShortcutRender displays a sequence like "c o d e" as individual keycaps per letter.
  */
 const ShortcutRender: React.FC<ShortcutsProps> = ({ value, currentInputChar }) => {
-  // 1. Input handling: split into characters and ignore spaces in both sequence and input
+  // 1. Input handling: split into characters and ignore spaces
   const chars = Array.from(value).filter(ch => ch.trim().length > 0);
-  const typedCount = currentInputChar.replace(/\s+/g, '').length;
 
   // 2. Core processing: normalize labels for presentation (uppercase)
   const labels = chars.map(ch => ch.toUpperCase());
@@ -162,7 +180,7 @@ const ShortcutRender: React.FC<ShortcutsProps> = ({ value, currentInputChar }) =
   return (
     <div className="flex items-center gap-1.5">
       {labels.map((label, idx) => (
-        <KeyCap key={`${label}-${idx}`} label={label} isActive={idx < typedCount} />
+        <KeyCap key={`${label}-${idx}`} label={label} isActive={currentInputChar.length > idx} />
       ))}
     </div>
   );
