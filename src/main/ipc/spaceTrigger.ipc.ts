@@ -1,7 +1,7 @@
 import { config } from '../../shared/config';
 import * as spaceTriggerService from '../services/spaceTrigger.service';
 import { logger } from '../utils/logger';
-import * as shortcutService from '@/main/services/shortcut.service';
+import * as shortcutService from 'src/main/services/hotkey.service';
 
 config.spaceTrigger.getKeyBindings.handle(async () => {
   try {

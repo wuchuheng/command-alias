@@ -110,45 +110,29 @@ function runPowerShell(script: string): Promise<void> {
 async function bringToForeground(executableName: string): Promise<void> {
   // 1. Input handling
   const ps = `
-Add-Type @"
-using System;
-using System.Runtime.InteropServices;
-public static class Win32 {
-  [DllImport("user32.dll")] public static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow);
-  [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hWnd);
-  [DllImport("user32.dll")] public static extern bool IsIconic(IntPtr hWnd);
-  [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
-  [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out int lpdwProcessId);
-  [DllImport("user32.dll")] public static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach);
-  [DllImport("user32.dll")] public static extern bool BringWindowToTop(IntPtr hWnd);
-}
-"@
-
+$shell = New-Object -ComObject WScript.Shell
 $procs = Get-Process -Name "${executableName}" -ErrorAction SilentlyContinue |
          Where-Object { $_.MainWindowHandle -ne 0 }
 if (-not $procs) { return }
 
-$main = $procs | Sort-Object StartTime | Select-Object -First 1
-$h = $main.MainWindowHandle
+$p = $procs | Sort-Object StartTime | Select-Object -First 1
 
-# 2. Core processing - restore if minimized and force foreground
-if ([Win32]::IsIconic($h)) { [Win32]::ShowWindowAsync($h, 9) | Out-Null } # SW_RESTORE = 9
+# 2. Core processing - fast path: AppActivate by PID or title
+if (-not $shell.AppActivate($p.Id)) { $null = $shell.AppActivate($p.MainWindowTitle) }
 
-$fg = [Win32]::GetForegroundWindow()
-[int]$fgPid = 0
-$fgTid = [Win32]::GetWindowThreadProcessId($fg, [ref]$fgPid)
-[int]$targetPid = 0
-$targetTid = [Win32]::GetWindowThreadProcessId($h, [ref]$targetPid)
-
-if ($fgTid -ne $targetTid) { [Win32]::AttachThreadInput($targetTid, $fgTid, $true) | Out-Null }
-[Win32]::BringWindowToTop($h) | Out-Null
-[Win32]::SetForegroundWindow($h) | Out-Null
-Start-Sleep -Milliseconds 50
-if ($fgTid -ne $targetTid) { [Win32]::AttachThreadInput($targetTid, $fgTid, $false) | Out-Null }
-
-# 3. Output handling - Fallback via AppActivate if needed
-$shell = New-Object -ComObject WScript.Shell
-if (-not $shell.AppActivate($main.Id)) { $null = $shell.AppActivate($main.MainWindowTitle) }
+# 2.1 Minimal fallback: restore and foreground using user32
+if (-not $shell.AppActivate($p.Id)) {
+Add-Type @"
+using System;
+using System.Runtime.InteropServices;
+public static class W {
+  [DllImport("user32.dll")] public static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow);
+  [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hWnd);
+}
+"@
+  [W]::ShowWindowAsync($p.MainWindowHandle, 9) | Out-Null # SW_RESTORE
+  [W]::SetForegroundWindow($p.MainWindowHandle) | Out-Null
+}
 `;
 
   // 2. Core processing

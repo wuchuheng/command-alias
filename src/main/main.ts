@@ -3,7 +3,7 @@ import { setupAllIpcHandlers } from './ipc';
 import { createWindow } from './windows/windowFactory';
 import { bootload } from './services/bootload.service';
 import { initDB } from './database/data-source';
-import * as globalShortcut from './services/shortcut.service';
+import * as globalHotKey from './services/hotkey.service';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -30,12 +30,12 @@ app.on('ready', async () => {
   setupAllIpcHandlers();
 
   // 2.4 Register global keyboard handlers
-  globalShortcut.registerCtrlSpaceHandler();
+  globalHotKey.registerCtrlSpaceHandler();
 
   // Cleanup on quit
 });
 
-app.on('will-quit', () => globalShortcut.unregisterCtrlSpaceHandler());
+app.on('will-quit', () => globalHotKey.unregisterCtrlSpaceHandler());
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits

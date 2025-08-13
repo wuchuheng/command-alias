@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { KeyBinding } from 'src/main/database/entities/KeyBinding';
 
 /**
@@ -99,7 +99,7 @@ export default function CommandPalette() {
               className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 px-4 py-3 text-sm hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800/60"
             >
               <span className="col-span-3 font-mono text-gray-900 dark:text-gray-100">
-                <ShotcutRender value={binding.sequence} />
+                <ShortcutRender value={binding.sequence} currentInputChar={filter} />
               </span>
               <span className="col-span-5 truncate text-gray-700 dark:text-gray-300" title={binding.target}>
                 {binding.target}
@@ -118,24 +118,43 @@ export default function CommandPalette() {
   );
 }
 
-/**
- * Renders a compact keycap, styled to resemble a keyboard key.
- */
-const KeyCap = ({ label }: { label: string }) => {
-  // 3. Output handling: present a styled key label
-  return (
-    <span className="inline-flex min-w-[1rem] items-center justify-center rounded border border-gray-300 bg-gray-100 px-1 font-mono text-xs leading-5 text-gray-800 shadow-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
-      {label}
-    </span>
-  );
+type KeyCapProps = {
+  /** Key label to render, e.g., "C" */
+  label: string;
+  /** True when this key has been typed already (active/confirmed). */
+  isActive?: boolean;
 };
 
 /**
- * ShotcutRender displays a sequence like "c o d e" as individual keycaps per letter.
+ * Renders a compact keycap, styled to resemble a keyboard key.
+ * Highlights keys already typed only (no next-key hint).
  */
-const ShotcutRender = ({ value }: { value: string }) => {
-  // 1. Input handling: split into characters and ignore spaces
+const KeyCap: React.FC<KeyCapProps> = ({ label, isActive = false }) => {
+  // 2. Core processing: choose style based on state
+  const base =
+    'inline-flex min-w-[1rem] items-center justify-center rounded border px-1 font-mono text-xs leading-5 shadow-sm';
+  const inactive = 'border-gray-300 bg-gray-100 text-gray-800 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100';
+  const active = 'border-gray-500 bg-gray-200 text-gray-900 dark:border-gray-500 dark:bg-gray-700 dark:text-gray-100';
+
+  // 3. Output handling: render styled key label
+  return <span className={`${base} ${isActive ? active : inactive}`}>{label}</span>;
+};
+
+type ShortcutsProps = {
+  /** Full shortcut sequence, e.g., "c o d e" */
+  value: string;
+  /** Raw user input so far (may include spaces) */
+  currentInputChar: string;
+};
+
+/**
+ * ShortcutRender displays a sequence like "c o d e" as individual keycaps, highlighting
+ * already-typed keys and hinting the next key.
+ */
+const ShortcutRender: React.FC<ShortcutsProps> = ({ value, currentInputChar }) => {
+  // 1. Input handling: split into characters and ignore spaces in both sequence and input
   const chars = Array.from(value).filter(ch => ch.trim().length > 0);
+  const typedCount = currentInputChar.replace(/\s+/g, '').length;
 
   // 2. Core processing: normalize labels for presentation (uppercase)
   const labels = chars.map(ch => ch.toUpperCase());
@@ -143,7 +162,7 @@ const ShotcutRender = ({ value }: { value: string }) => {
   return (
     <div className="flex items-center gap-1.5">
       {labels.map((label, idx) => (
-        <KeyCap key={`${label}-${idx}`} label={label} />
+        <KeyCap key={`${label}-${idx}`} label={label} isActive={idx < typedCount} />
       ))}
     </div>
   );
