@@ -12,6 +12,12 @@ export type BootloadingProgressing = {
   title: string;
 };
 
+export type GetKeyBindingInput = {
+  id: string;
+  sequence: string;
+  comment?: string;
+}[];
+
 declare global {
   interface Window {
     electron: {
@@ -58,6 +64,9 @@ declare global {
        */
       welcome: {
         getWelcome: () => Promise<Welcome>;
+      };
+      spaceTrigger: {
+        getKeyBindings: () => Promise<GetKeyBindingInput>;
       };
     };
   }

@@ -1,5 +1,5 @@
 import { Welcome } from 'src/main/database/entities/welcom';
-import { BootloadingProgressing } from '../types/electron';
+import { BootloadingProgressing, GetKeyBindingInput } from '../types/electron';
 import { StrictConfig } from './config-utils';
 import { createIpcChannel } from './ipc-channel';
 import createSubscriptionChannel from './ipc-subscription';
@@ -18,5 +18,9 @@ export const config: StrictConfig = {
   },
   welcome: {
     getWelcome: createIpcChannel<void, Welcome>('welcome/getWelcome'),
+  },
+
+  spaceTrigger: {
+    getKeyBindings: createIpcChannel<void, GetKeyBindingInput>('spaceTrigger/getKeyBindings'),
   },
 };

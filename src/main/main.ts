@@ -22,12 +22,12 @@ app.on('ready', async () => {
   // 2.1 Create the main window.
   mainWindow = createWindow();
 
-  // 2.2 Setup all IPC handlers
-  setupAllIpcHandlers();
-
-  // 2.3 Bootload the application
+  // 2.2 Bootload the application (must happen before IPC handlers)
   bootload.register({ title: 'Initializing Database ...', load: initDB });
   await bootload.boot();
+
+  // 2.3 Setup all IPC handlers (after database is initialized)
+  setupAllIpcHandlers();
 
   // 2.4 Register global keyboard handlers
   globalShortcut.registerCtrlSpaceHandler();

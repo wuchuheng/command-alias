@@ -1,4 +1,4 @@
-import { BrowserWindow } from 'electron';
+import { BrowserWindow, screen } from 'electron';
 import { logger } from '../utils/logger';
 
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
@@ -87,4 +87,54 @@ export const createWindow = (): BrowserWindow => {
     logger.error(`Error stack: ${error instanceof Error ? error.stack : 'No stack available'}`);
     throw error;
   }
+};
+
+let commandPaletteWindow: BrowserWindow | null = null;
+
+export const createCommandPaletteWindow = (): BrowserWindow => {
+  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+  const windowWidth = 600;
+  const minHeight = 100;
+
+  const window = new BrowserWindow({
+    width: windowWidth,
+    height: minHeight,
+    x: Math.floor((width - windowWidth) / 2),
+    y: Math.floor((height - minHeight) / 2),
+    frame: false,
+    transparent: true,
+    alwaysOnTop: true,
+    focusable: true,
+    skipTaskbar: true,
+    show: false,
+    webPreferences: {
+      preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
+      contextIsolation: true,
+    },
+  });
+
+  window.loadURL(`${MAIN_WINDOW_WEBPACK_ENTRY}?windowType=command-palette`);
+
+  window.on('closed', () => {
+    commandPaletteWindow = null;
+  });
+
+  return window;
+};
+
+export const showCommandPalette = () => {
+  if (!commandPaletteWindow) {
+    commandPaletteWindow = createCommandPaletteWindow();
+  }
+
+  commandPaletteWindow.show();
+  commandPaletteWindow.focus();
+
+  commandPaletteWindow.on('blur', () => {
+    commandPaletteWindow?.hide();
+  });
+};
+
+export const hideCommandPalette = () => {
+  commandPaletteWindow?.hide();
 };
