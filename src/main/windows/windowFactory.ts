@@ -89,12 +89,14 @@ export const createWindow = (): BrowserWindow => {
   }
 };
 
-let commandPaletteWindow: BrowserWindow | null = null;
-
+/**
+ * Create the command palette window.
+ * @returns The created BrowserWindow instance.
+ */
 export const createCommandPaletteWindow = (): BrowserWindow => {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
   const windowWidth = 600;
-  const minHeight = 100;
+  const minHeight = 800;
 
   const window = new BrowserWindow({
     width: windowWidth,
@@ -115,26 +117,5 @@ export const createCommandPaletteWindow = (): BrowserWindow => {
 
   window.loadURL(`${MAIN_WINDOW_WEBPACK_ENTRY}?windowType=command-palette`);
 
-  window.on('closed', () => {
-    commandPaletteWindow = null;
-  });
-
   return window;
-};
-
-export const showCommandPalette = () => {
-  if (!commandPaletteWindow) {
-    commandPaletteWindow = createCommandPaletteWindow();
-  }
-
-  commandPaletteWindow.show();
-  commandPaletteWindow.focus();
-
-  commandPaletteWindow.on('blur', () => {
-    commandPaletteWindow?.hide();
-  });
-};
-
-export const hideCommandPalette = () => {
-  commandPaletteWindow?.hide();
 };

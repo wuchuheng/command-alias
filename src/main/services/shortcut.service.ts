@@ -49,3 +49,13 @@ export const unregisterCtrlSpaceHandler = () => {
     commandPaletteWindow = null;
   }
 };
+
+/**
+ * Hide the command palette window if it's open.
+ */
+export const hideCommandPalette = async () => {
+  logger.info('Hiding command palette');
+  if (commandPaletteWindow) {
+    commandPaletteWindow.hide();
+  }
+};

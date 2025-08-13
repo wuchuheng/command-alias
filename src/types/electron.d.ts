@@ -1,3 +1,4 @@
+import { KeyBinding } from 'src/main/database/entities/KeyBinding';
 import { Welcome } from 'src/main/database/entities/welcom';
 
 export type Pagination<T> = {
@@ -11,12 +12,6 @@ export type BootloadingProgressing = {
   progress: number;
   title: string;
 };
-
-export type GetKeyBindingInput = {
-  id: string;
-  sequence: string;
-  comment?: string;
-}[];
 
 declare global {
   interface Window {
@@ -66,7 +61,13 @@ declare global {
         getWelcome: () => Promise<Welcome>;
       };
       spaceTrigger: {
-        getKeyBindings: () => Promise<GetKeyBindingInput>;
+        getKeyBindings: () => Promise<KeyBinding[]>;
+
+        addBinding: (binding: Omit<KeyBinding, 'id'>) => Promise<void>;
+
+        toggleApp: (id: number) => Promise<void>;
+
+        hideCommandPalette: () => Promise<void>;
       };
     };
   }

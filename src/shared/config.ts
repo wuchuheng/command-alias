@@ -1,8 +1,9 @@
 import { Welcome } from 'src/main/database/entities/welcom';
-import { BootloadingProgressing, GetKeyBindingInput } from '../types/electron';
+import { BootloadingProgressing } from '../types/electron';
 import { StrictConfig } from './config-utils';
 import { createIpcChannel } from './ipc-channel';
 import createSubscriptionChannel from './ipc-subscription';
+import { KeyBinding } from 'src/main/database/entities/KeyBinding';
 
 // Use StrictConfig to ensure implementation matches Window["electron"] interface
 export const config: StrictConfig = {
@@ -21,6 +22,12 @@ export const config: StrictConfig = {
   },
 
   spaceTrigger: {
-    getKeyBindings: createIpcChannel<void, GetKeyBindingInput>('spaceTrigger/getKeyBindings'),
+    getKeyBindings: createIpcChannel<void, KeyBinding[]>('spaceTrigger/getKeyBindings'),
+
+    addBinding: createIpcChannel<Omit<KeyBinding, 'id'>, void>('spaceTrigger/addBinding'),
+
+    toggleApp: createIpcChannel<number, void>('spaceTrigger/triggerAction'),
+
+    hideCommandPalette: createIpcChannel<void, void>('spaceTrigger/hideCommandPalette'),
   },
 };
