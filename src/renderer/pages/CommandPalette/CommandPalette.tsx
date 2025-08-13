@@ -102,7 +102,7 @@ export default function CommandPalette() {
         type="text"
         ref={inputRef}
         className="w-full border-b border-gray-200 bg-transparent p-4 text-gray-900 placeholder-gray-400 outline-none dark:border-gray-700 dark:text-gray-100"
-        placeholder="Type to filter commands..."
+        placeholder="Type a shortcut sequence (e.g., c o d e). Press Esc to close"
         value={filter}
         onChange={onChange}
         autoFocus
