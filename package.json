@@ -1,6 +1,6 @@
 {
-  "name": "electron-app-name",
-  "productName": "App-name",
+  "name": "command-alias",
+  "productName": "Command Alias",
   "version": "1.0.0",
   "description": "My Electron application description",
   "main": ".webpack/main",
@@ -11,7 +11,9 @@
     "publish": "electron-forge publish",
     "lint": "eslint --ext .ts,.tsx .",
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,scss}\"",
-    "gen:logo": "outputDir='./src/renderer/assets/genLogo'; npx electron-icon-maker --input=./src/renderer/assets/logo.png --output=${outputDir} && mv ${outputDir}/icons/mac/icon.icns ${outputDir} && mv ${outputDir}/icons/png/1024x1024.png ${outputDir}/icon.png && mv ${outputDir}/icons/win/icon.ico ${outputDir} && rm -rf ${outputDir}/icons"
+    "build:logo": "ts-node scripts/generate-logo.ts",
+    "gen:icons": "npx electron-icon-maker --input=./src/renderer/assets/logo.png --output=./src/renderer/assets/genLogo && ts-node scripts/finalize-icons.ts",
+    "gen:branding": "npm run build:logo && npm run gen:icons"
   },
   "keywords": [],
   "author": {
@@ -67,6 +69,8 @@
     "react-dom": "^19.1.0",
     "react-i18next": "^15.5.2",
     "react-router-dom": "^7.6.1",
-    "typeorm": "^0.3.24"
+    "sharp": "^0.34.3",
+    "typeorm": "^0.3.24",
+    "windows-shortcuts": "^0.1.6"
   }
 }

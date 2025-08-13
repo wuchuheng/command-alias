@@ -1,11 +1,15 @@
 import { logger } from '../utils/logger';
-import { KeyBinding } from '../database/entities/KeyBinding';
+import { CommandAlias } from '../database/entities/CommandAlias';
 import { getDataSource } from '../database/data-source';
 import * as child_process from 'child_process';
 import * as path from 'path';
+import { aliasSubscription } from '../ipc/subscription';
 
-export const getKeyBindings = async (): Promise<KeyBinding[]> => {
-  const keyBindingRepository = getDataSource().getRepository(KeyBinding);
+/***
+ * Get all command aliases from the database.
+ */
+export const getAlias = async (): Promise<CommandAlias[]> => {
+  const keyBindingRepository = getDataSource().getRepository(CommandAlias);
   try {
     // 1. Input handling - No validation needed for simple query
 
@@ -22,11 +26,18 @@ export const getKeyBindings = async (): Promise<KeyBinding[]> => {
   }
 };
 
-export const addBinding = async (binding: Omit<KeyBinding, 'id'>) => {
-  const keyBindingRepository = getDataSource().getRepository(KeyBinding);
+/**
+ * Add a new key binding to the database.
+ * @param binding
+ */
+export const addAlias = async (binding: Omit<CommandAlias, 'id'>) => {
+  const keyBindingRepository = getDataSource().getRepository(CommandAlias);
   try {
     const newBinding = keyBindingRepository.create(binding);
     await keyBindingRepository.save(newBinding);
+
+    const newAlias = await getAlias();
+    aliasSubscription.broadcast(newAlias);
   } catch (error) {
     logger.error('Failed to add key binding', error);
     throw error;
@@ -34,7 +45,7 @@ export const addBinding = async (binding: Omit<KeyBinding, 'id'>) => {
 };
 
 export const triggerAction = async (id: number): Promise<void> => {
-  const keyBindingRepository = getDataSource().getRepository(KeyBinding);
+  const keyBindingRepository = getDataSource().getRepository(CommandAlias);
 
   // 2. Core processing - Trigger action through repository
   const binding = await keyBindingRepository.findOneBy({ id });
@@ -145,7 +156,11 @@ public static class W {
   }
 }
 
-const launchApp = async (binding: KeyBinding) => {
+/**
+ * Launch an application based on the provided key binding.
+ * @param binding - The key binding to use for launching the app.
+ */
+const launchApp = async (binding: CommandAlias) => {
   try {
     // 1. Extract executable name without extension
     const executableName = path.basename(binding.target).replace('.exe', '');

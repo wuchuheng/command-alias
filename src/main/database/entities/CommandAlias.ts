@@ -1,7 +1,8 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-@Entity()
-export class KeyBinding {
+// TODO: Rename the KeyBinding to CommandAlias
+@Entity('key_binding')
+export class CommandAlias {
   @PrimaryGeneratedColumn()
   id: number;
 

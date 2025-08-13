@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import type { KeyBinding } from '../../main/database/entities/KeyBinding';
+import { useEffect, useMemo, useState } from 'react';
+import type { CommandAlias } from '../../main/database/entities/CommandAlias';
 
 interface AddBindingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (binding: Omit<KeyBinding, 'id'>) => Promise<void>;
+  onAdd: (binding: Omit<CommandAlias, 'id'>) => Promise<void>;
 }
 
 export const AddBindingModal = ({ isOpen, onClose, onAdd }: AddBindingModalProps) => {
@@ -14,6 +14,41 @@ export const AddBindingModal = ({ isOpen, onClose, onAdd }: AddBindingModalProps
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  // Installed apps (Windows) support
+  type InstalledApp = { id: string; name: string; path: string; iconDataUrl?: string };
+  const [apps, setApps] = useState<InstalledApp[]>([]);
+  const [appsLoading, setAppsLoading] = useState(false);
+  const [appsError, setAppsError] = useState<string | null>(null);
+  const [appSearch, setAppSearch] = useState('');
+
+  const loadApps = async (force = false) => {
+    if (actionType !== 'launch-app') return;
+    setAppsLoading(true);
+    setAppsError(null);
+    try {
+      const data = force
+        ? await window.electron.apps.refreshInstalledApps()
+        : await window.electron.apps.getInstalledApps();
+      setApps(data);
+    } catch (e) {
+      setAppsError(e instanceof Error ? e.message : 'Failed to load apps');
+    } finally {
+      setAppsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen && actionType === 'launch-app') {
+      void loadApps(false);
+    }
+  }, [isOpen, actionType]);
+
+  const filteredApps = useMemo(() => {
+    const q = appSearch.trim().toLowerCase();
+    if (!q) return apps;
+    return apps.filter(a => a.name.toLowerCase().includes(q));
+  }, [apps, appSearch]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,7 +112,7 @@ export const AddBindingModal = ({ isOpen, onClose, onAdd }: AddBindingModalProps
             <label className="mb-2 block font-medium">Action Type</label>
             <select
               value={actionType}
-              onChange={e => setActionType(e.target.value as any)}
+              onChange={e => setActionType(e.target.value as typeof actionType)}
               className="w-full rounded border p-2 dark:border-gray-600 dark:bg-gray-700"
             >
               <option value="launch-app">Launch Application</option>
@@ -88,14 +123,84 @@ export const AddBindingModal = ({ isOpen, onClose, onAdd }: AddBindingModalProps
 
           <div className="mb-4">
             <label className="mb-2 block font-medium">Target</label>
-            <input
-              type="text"
-              value={target}
-              onChange={e => setTarget(e.target.value)}
-              className="w-full rounded border p-2 dark:border-gray-600 dark:bg-gray-700"
-              placeholder="Path or command"
-              required
-            />
+            {actionType === 'launch-app' && (
+              <div className="mb-2">
+                <div className="mb-2 flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={appSearch}
+                    onChange={e => setAppSearch(e.target.value)}
+                    placeholder="Search installed apps"
+                    className="w-full rounded border p-2 dark:border-gray-600 dark:bg-gray-700"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => loadApps(true)}
+                    className="whitespace-nowrap rounded border px-3 py-2 text-sm hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700"
+                    disabled={appsLoading}
+                    title="Refresh"
+                  >
+                    {appsLoading ? 'Loading…' : 'Refresh'}
+                  </button>
+                </div>
+                {appsError && (
+                  <div className="mb-2 rounded bg-red-100 p-2 text-sm text-red-800 dark:bg-red-900 dark:text-red-100">
+                    {appsError}
+                  </div>
+                )}
+                <div className="max-h-48 overflow-auto rounded border dark:border-gray-600">
+                  {appsLoading && apps.length === 0 ? (
+                    <div className="p-2 text-sm opacity-70">Loading installed apps…</div>
+                  ) : filteredApps.length === 0 ? (
+                    <div className="p-2 text-sm opacity-70">No apps found</div>
+                  ) : (
+                    <ul>
+                      {filteredApps.map(appItem => (
+                        <li
+                          key={appItem.id}
+                          className="flex cursor-pointer items-center gap-2 px-2 py-1 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          onClick={() => setTarget(appItem.path)}
+                          title={appItem.path}
+                        >
+                          {appItem.iconDataUrl ? (
+                            <img src={appItem.iconDataUrl} alt="" className="h-4 w-4" />
+                          ) : (
+                            <div className="flex h-4 w-4 items-center justify-center rounded bg-gray-300 text-[10px] text-gray-700 dark:bg-gray-600 dark:text-gray-100">
+                              {appItem.name.slice(0, 1)}
+                            </div>
+                          )}
+                          <span className="truncate text-sm">{appItem.name}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
+            )}
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={target}
+                onChange={e => setTarget(e.target.value)}
+                className="w-full rounded border p-2 dark:border-gray-600 dark:bg-gray-700"
+                placeholder={
+                  actionType === 'launch-app' ? 'Executable path (auto-filled when you pick an app)' : 'Path or command'
+                }
+                required
+              />
+              {actionType === 'launch-app' && (
+                <button
+                  type="button"
+                  className="rounded border px-3 py-2 text-sm hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700"
+                  onClick={async () => {
+                    const p = await window.electron.apps.browseForExecutable();
+                    if (p) setTarget(p);
+                  }}
+                >
+                  Browse…
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="mb-4">

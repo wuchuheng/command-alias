@@ -1,14 +1,14 @@
 import { config } from '../../shared/config';
-import * as spaceTriggerService from '../services/spaceTrigger.service';
+import * as CommandAliasService from '../services/alias.service';
 import { logger } from '../utils/logger';
-import * as shortcutService from 'src/main/services/hotkey.service';
+import * as shortcutService from '@/main/services/hotkey.service';
 
-config.spaceTrigger.getKeyBindings.handle(async () => {
+config.commandAlias.getAlias.handle(async () => {
   try {
     // 1. Input handling - No parameters to validate
 
     // 2. Core processing - Get bindings from service
-    const bindings = await spaceTriggerService.getKeyBindings();
+    const bindings = await CommandAliasService.getAlias();
 
     // 3. Output handling
     return bindings;
@@ -18,7 +18,7 @@ config.spaceTrigger.getKeyBindings.handle(async () => {
   }
 });
 
-config.spaceTrigger.addBinding.handle(async binding => {
+config.commandAlias.addAlias.handle(async binding => {
   try {
     // 1. Input handling - Validate binding
     if (!binding || !binding.sequence || !binding.actionType) {
@@ -26,7 +26,7 @@ config.spaceTrigger.addBinding.handle(async binding => {
     }
 
     // 2. Core processing - Add binding through service
-    await spaceTriggerService.addBinding(binding);
+    await CommandAliasService.addAlias(binding);
 
     // 3. Output handling - No specific output
   } catch (error) {
@@ -35,7 +35,7 @@ config.spaceTrigger.addBinding.handle(async binding => {
   }
 });
 
-config.spaceTrigger.toggleApp.handle(async id => {
+config.commandAlias.toggleApp.handle(async id => {
   try {
     // 1. Input handling - Validate ID
     if (typeof id !== 'number' || id <= 0) {
@@ -43,7 +43,7 @@ config.spaceTrigger.toggleApp.handle(async id => {
     }
 
     // 2. Core processing - Trigger action through service
-    await spaceTriggerService.triggerAction(id);
+    await CommandAliasService.triggerAction(id);
 
     // 3. Output handling - No specific output
   } catch (error) {
@@ -52,4 +52,4 @@ config.spaceTrigger.toggleApp.handle(async id => {
   }
 });
 
-config.spaceTrigger.hideCommandPalette.handle(shortcutService.hideCommandPalette);
+config.commandAlias.hideCommandPalette.handle(shortcutService.hideCommandPalette);

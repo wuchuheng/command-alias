@@ -1,4 +1,4 @@
-import { KeyBinding } from 'src/main/database/entities/KeyBinding';
+import { CommandAlias } from 'src/main/database/entities/CommandAlias';
 import { Welcome } from 'src/main/database/entities/welcom';
 
 export type Pagination<T> = {
@@ -60,14 +60,23 @@ declare global {
       welcome: {
         getWelcome: () => Promise<Welcome>;
       };
-      spaceTrigger: {
-        getKeyBindings: () => Promise<KeyBinding[]>;
 
-        addBinding: (binding: Omit<KeyBinding, 'id'>) => Promise<void>;
+      commandAlias: {
+        getAlias: () => Promise<CommandAlias[]>;
+
+        addAlias: (binding: Omit<CommandAlias, 'id'>) => Promise<void>;
 
         toggleApp: (id: number) => Promise<void>;
 
         hideCommandPalette: () => Promise<void>;
+
+        subscribeToAlias: (callback: (bindings: CommandAlias[]) => void) => () => void;
+      };
+
+      apps: {
+        getInstalledApps: () => Promise<Array<{ id: string; name: string; path: string; iconDataUrl?: string }>>;
+        refreshInstalledApps: () => Promise<Array<{ id: string; name: string; path: string; iconDataUrl?: string }>>;
+        browseForExecutable: () => Promise<string | null>;
       };
     };
   }

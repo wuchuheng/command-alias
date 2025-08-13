@@ -1,8 +1,8 @@
-# SpaceTrigger Software Design Document
+# AliasLauncher Software Design Document
 
 ## 1. Introduction
 
-SpaceTrigger is a cross-platform keyboard shortcut launcher application inspired by SpaceTrigger for macOS. The application allows users to configure custom keyboard sequences to rapidly launch applications, execute commands, and streamline workflows.
+CommandAlias is a cross-platform keyboard shortcut launcher application inspired by CommandAlias for macOS. The application allows users to configure custom keyboard sequences to rapidly launch applications, execute commands, and streamline workflows.
 
 ### Core Features
 
@@ -96,7 +96,7 @@ Example binding:
        │      └─── UI Events ────────┘       │
        │                                      │
 ┌──────────────────────┐             ┌──────────────────────┐
-│   SpaceTrigger UI       │             │   SpaceTrigger Services │
+│   CommandAlias UI       │             │   CommandAlias Services │
 │   Components         │             │   & Business Logic   │
 └──────────────────────┘             └──────────────────────┘
                                               │
@@ -119,7 +119,7 @@ Example binding:
 ### 2.3 Process Communication
 
 1. **Renderer → Main**:
-   - User interactions trigger IPC calls via `window.electron.SpaceTrigger` API
+   - User interactions trigger IPC calls via `window.electron.CommandAlias` API
    - Requests are routed through preload script to main process
 2. **Main → Renderer**:
    - Service layer processes requests and returns data/responses
@@ -138,7 +138,7 @@ The interface declaration in `src/types/electron.d.ts` serves as the foundationa
 declare global {
   interface Window {
     electron: {
-      SpaceTrigger: {
+      CommandAlias: {
         // Core Methods
         setDelay: (delay: number) => Promise<void>;
         getKeyBindings: () => Promise<KeyBinding[]>;
@@ -162,21 +162,21 @@ Implementation in `src/shared/config.ts`:
 
 ```ts
 export const config: StrictConfig = {
-  SpaceTrigger: {
-    setDelay: createIpcChannel<number, void>('SpaceTrigger/setDelay'),
-    getKeyBindings: createIpcChannel<void, KeyBinding[]>('SpaceTrigger/getKeyBindings'),
-    addBinding: createIpcChannel<Omit<KeyBinding, 'id'>, KeyBinding>('SpaceTrigger/addBinding'),
-    onSequenceUpdate: createSubscriptionChannel<string[]>('SpaceTrigger/onSequenceUpdate'),
+  CommandAlias: {
+    setDelay: createIpcChannel<number, void>('CommandAlias/setDelay'),
+    getKeyBindings: createIpcChannel<void, KeyBinding[]>('CommandAlias/getKeyBindings'),
+    addBinding: createIpcChannel<Omit<KeyBinding, 'id'>, KeyBinding>('CommandAlias/addBinding'),
+    onSequenceUpdate: createSubscriptionChannel<string[]>('CommandAlias/onSequenceUpdate'),
   },
 };
 ```
 
 ### 3.3 Service Layer
 
-Business logic implementation (`src/main/services/SpaceTrigger.service.ts`):
+Business logic implementation (`src/main/services/CommandAlias.service.ts`):
 
 ```ts
-class SpaceTriggerService {
+class CommandAliasService {
   private activationDelay = 300;
   private keyBindings: KeyBinding[] = [];
 
@@ -197,13 +197,13 @@ class SpaceTriggerService {
 
 ### 3.4 IPC Handlers
 
-Connection between config and services (`src/main/ipc/SpaceTrigger.ipc.ts`):
+Connection between config and services (`src/main/ipc/CommandAlias.ipc.ts`):
 
 ```ts
 // Handle delay configuration
-config.SpaceTrigger.setDelay.handle(async delay => {
+config.CommandAlias.setDelay.handle(async delay => {
   try {
-    await SpaceTriggerService.setDelay(delay);
+    await CommandAliasService.setDelay(delay);
   } catch (error) {
     logger.error('Failed to set delay', error);
     throw error;
@@ -222,7 +222,7 @@ function useKeyBindings() {
   useEffect(() => {
     const loadBindings = async () => {
       try {
-        const data = await window.electron.SpaceTrigger.getKeyBindings();
+        const data = await window.electron.CommandAlias.getKeyBindings();
         setBindings(data);
       } catch (error) {
         console.error('Failed to load bindings', error);
@@ -237,7 +237,7 @@ function useKeyBindings() {
 
 ## 4. User Interface Interaction Flow
 
-SpaceTrigger features two core interfaces that facilitate distinct user interactions:
+CommandAlias features two core interfaces that facilitate distinct user interactions:
 
 ### 4.1 Dashboard UI (Configuration Interface)
 
@@ -257,7 +257,7 @@ SpaceTrigger features two core interfaces that facilitate distinct user interact
 **Visual Representation**:
 
 ```
-╔═══════════════════════════ SpaceTrigger ═════════════════════╗
+╔═══════════════════════════ CommandAlias ═════════════════════╗
 ║                                                           ║
 ║  Key Bindings                                             ║
 ║  ┌───────────────┬───────────────┬──────────────────────┐ ║
@@ -290,7 +290,7 @@ SpaceTrigger features two core interfaces that facilitate distinct user interact
 **Visual Representation**:
 
 ```
-          ╔════════════════ SpaceTrigger ═══════════════╗
+          ╔════════════════ CommandAlias ═══════════════╗
           ║                                          ║
           ║  Type to filter commands...              ║
           ║                                          ║

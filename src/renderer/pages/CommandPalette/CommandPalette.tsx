@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { KeyBinding } from 'src/main/database/entities/KeyBinding';
+import React, { useState, useEffect, useRef } from 'react';
+import { CommandAlias } from 'src/main/database/entities/CommandAlias';
 
 /**
  * CommandPalette renders the Notice UI overlay that lists key bindings and filters them in real-time
  * as the user types. It displays columns: Sequence, Target path/command, Type, and Comment.
  */
 export default function CommandPalette() {
-  const [bindings, setBindings] = useState<KeyBinding[]>([]);
+  const [bindings, setBindings] = useState<CommandAlias[]>([]);
   const [filter, setFilter] = useState('');
 
   /**
@@ -19,7 +19,7 @@ export default function CommandPalette() {
   /**
    * Convert an action type to a concise label.
    */
-  const getTypeLabel = (type: KeyBinding['actionType']): string => {
+  const getTypeLabel = (type: CommandAlias['actionType']): string => {
     switch (type) {
       case 'launch-app':
         return 'App';
@@ -32,19 +32,27 @@ export default function CommandPalette() {
     }
   };
 
+  const loadBindings = async () => {
+    // 1. Input handling: none (no params)
+    try {
+      const data: CommandAlias[] = await window.electron.commandAlias.getAlias();
+      setBindings(data);
+    } catch (error) {
+      console.error('Failed to load bindings', error);
+    }
+    // 3. Output handling: state updated -> UI renders
+  };
+
   useEffect(() => {
     // 2. Core processing: load all bindings when overlay mounts
-    const loadBindings = async () => {
-      // 1. Input handling: none (no params)
-      try {
-        const data: KeyBinding[] = await window.electron.spaceTrigger.getKeyBindings();
-        setBindings(data);
-      } catch (error) {
-        console.error('Failed to load bindings', error);
-      }
-      // 3. Output handling: state updated -> UI renders
-    };
     loadBindings();
+    const cancel = window.electron.commandAlias.subscribeToAlias((newBindings: CommandAlias[]) => {
+      setBindings(newBindings);
+    });
+
+    return () => {
+      cancel();
+    };
   }, []);
 
   const normalizedFilter = normalizeSequence(filter);
@@ -60,12 +68,12 @@ export default function CommandPalette() {
     if (!matchedHotkey) return;
 
     // 3. Output handling: execute and close overlay
-    await window.electron.spaceTrigger.hideCommandPalette();
+    await window.electron.commandAlias.hideCommandPalette();
     setFilter('');
-    await window.electron.spaceTrigger.toggleApp(matchedHotkey.id);
+    await window.electron.commandAlias.toggleApp(matchedHotkey.id);
   };
 
-  const inputRef = React.useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     inputRef.current?.focus();
   }, [inputRef]);
@@ -73,7 +81,7 @@ export default function CommandPalette() {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        window.electron.spaceTrigger.hideCommandPalette();
+        window.electron.commandAlias.hideCommandPalette();
         setFilter('');
         return;
       }
@@ -91,17 +99,25 @@ export default function CommandPalette() {
     };
   }, [inputRef]);
 
+  const borderRadius = '12px';
   return (
     <div
       className="w-full max-w-3xl overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900"
+      style={{
+        borderRadius: borderRadius,
+      }}
       role="dialog"
       aria-modal="true"
-      aria-label="SpaceTrigger Command Palette"
+      aria-label="CommandAlias Command Palette"
     >
       <input
         type="text"
         ref={inputRef}
-        className="w-full border-b border-gray-200 bg-transparent p-4 text-gray-900 placeholder-gray-400 outline-none dark:border-gray-700 dark:text-gray-100"
+        style={{
+          borderTopLeftRadius: borderRadius,
+          borderTopRightRadius: borderRadius,
+        }}
+        className="w-full rounded-t-lg border-b border-gray-200 p-4 text-gray-900 placeholder-gray-400 outline-none dark:border-gray-700 dark:text-gray-100"
         placeholder="Type a shortcut sequence (e.g., c o d e). Press Esc to close"
         value={filter}
         onChange={onChange}
@@ -153,10 +169,21 @@ type KeyCapProps = {
 /**
  * Renders a compact keycap, styled to resemble a keyboard key.
  */
-const KeyCap: React.FC<KeyCapProps> = ({ label }) => {
+const KeyCap: React.FC<KeyCapProps> = ({ label, isActive }) => {
   // 3. Output handling: present a styled key label
   return (
-    <span className="inline-flex min-w-[1rem] items-center justify-center rounded border border-gray-300 bg-gray-100 px-1 font-mono text-xs leading-5 text-gray-800 shadow-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
+    <span
+      className={[
+        // Base keycap visuals
+        'inline-flex min-w-[1rem] items-center justify-center rounded px-1 font-mono text-xs leading-5 shadow-sm transition-colors',
+        // Variant: dim already-typed (active) keys to emphasize remaining keys
+        isActive
+          ? 'border border-gray-300 bg-gray-50 text-gray-400 opacity-60 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-500'
+          : 'border border-gray-300 bg-gray-100 text-gray-800 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100',
+      ].join(' ')}
+      aria-disabled={isActive}
+      title={isActive ? 'Already typed' : 'Pending'}
+    >
       {label}
     </span>
   );

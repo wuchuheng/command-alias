@@ -3,7 +3,7 @@ import { BootloadingProgressing } from '../types/electron';
 import { StrictConfig } from './config-utils';
 import { createIpcChannel } from './ipc-channel';
 import createSubscriptionChannel from './ipc-subscription';
-import { KeyBinding } from 'src/main/database/entities/KeyBinding';
+import { CommandAlias } from 'src/main/database/entities/CommandAlias';
 
 // Use StrictConfig to ensure implementation matches Window["electron"] interface
 export const config: StrictConfig = {
@@ -21,13 +21,28 @@ export const config: StrictConfig = {
     getWelcome: createIpcChannel<void, Welcome>('welcome/getWelcome'),
   },
 
-  spaceTrigger: {
-    getKeyBindings: createIpcChannel<void, KeyBinding[]>('spaceTrigger/getKeyBindings'),
+  commandAlias: {
+    getAlias: createIpcChannel<void, CommandAlias[]>('CommandAlias/getKeyBindings'),
 
-    addBinding: createIpcChannel<Omit<KeyBinding, 'id'>, void>('spaceTrigger/addBinding'),
+    addAlias: createIpcChannel<Omit<CommandAlias, 'id'>, void>('CommandAlias/addBinding'),
 
-    toggleApp: createIpcChannel<number, void>('spaceTrigger/triggerAction'),
+    toggleApp: createIpcChannel<number, void>('CommandAlias/triggerAction'),
 
-    hideCommandPalette: createIpcChannel<void, void>('spaceTrigger/hideCommandPalette'),
+    hideCommandPalette: createIpcChannel<void, void>('CommandAlias/hideCommandPalette'),
+
+    subscribeToAlias: createSubscriptionChannel<CommandAlias[]>('CommandAlias/subscribeToKeyBindings'),
+  },
+
+  apps: {
+    getInstalledApps: createIpcChannel<void, Array<{ id: string; name: string; path: string; iconDataUrl?: string }>>(
+      'apps/getInstalledApps'
+    ),
+
+    refreshInstalledApps: createIpcChannel<
+      void,
+      Array<{ id: string; name: string; path: string; iconDataUrl?: string }>
+    >('apps/refreshInstalledApps'),
+
+    browseForExecutable: createIpcChannel<void, string | null>('apps/browseForExecutable'),
   },
 };
