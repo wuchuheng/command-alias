@@ -100,7 +100,7 @@ export const createCommandPaletteWindow = (): BrowserWindow => {
     width: windowWidth,
     height: minHeight,
     x: Math.floor((width - windowWidth) / 2),
-    y: Math.floor((height - minHeight) / 2),
+    y: Math.floor(height * (150 / 1080)),
     frame: false,
     transparent: true,
     alwaysOnTop: true,
