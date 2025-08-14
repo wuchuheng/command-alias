@@ -1,208 +1,194 @@
-## General Guidelines
+# GitHub Copilot Project Rules (Multi‑language)
 
-- Use JSDoc-style documentation comments (/\*_ ... _/) to describe the purpose, type, or constraints of classes, properties, and methods.
-- Use numbered inline comments (e.g., // 1., // 2.) only inside method bodies to annotate logical steps.
-- Do not use numbered comments for class properties, class definitions, decorators, or above any code blocks.
-- Ensure comments are concise, clear, and relevant to the code they describe.
+Purpose: Provide clear, enforceable guidance so AI‑generated code matches our commenting and readability standards.
+Scope: Applies to all source files in this repository. Language adapters below specify how to express the same standards.
 
-## For Class Definitions
+---
 
-- Add a JSDoc comment above the class to describe its purpose and functionality.
-- Do not add numbered comments for the class itself or its decorators (e.g., @Entity).
-- Example:
+## TL;DR (defaults Copilot must follow)
+
+- Add doc comments for classes/types, properties/fields, and functions/methods.
+- Use numbered inline comments only inside function/method bodies to mark steps.
+- Always follow 1/2/3 phases: 1 = Input, 2 = Core, 3 = Output; omit for trivial bodies.
+- Never place numbered comments at file/module scope, on decorators/annotations, or above properties.
+- Keep lines ≤ 120 chars; wrap args, template strings, and objects for readability.
+- Match nearby file style; prefer explicit types and safe narrowing when applicable.
+
+---
+
+## Defaults checklist (for Copilot)
+
+- JSDoc/Javadoc/docstring present on: classes/types, fields, and functions/methods (concise and relevant).
+- Numeric comments only inside function bodies for non‑trivial logic (1/2/3; use 1.1, 2.2.1 when it helps).
+- ≤ 120 chars per line; break long args/objects/strings across lines with trailing commas where supported.
+- No implicit any where typing exists; add minimal explicit types or guards.
+- Comments are short, actionable, and near the code they describe.
+
+---
+
+## Three‑phase numeric comment convention (all languages)
+
+Use numeric comments only inside function/method bodies.
+
+- 1.\* Input Handling: validate/parse parameters, type checks, defaults, guards.
+- 2.\* Core Processing: transformations, calculations, I/O, side effects.
+- 3.\* Output Handling: return values, emit/resolve/respond, cleanup.
+
+Minimal example:
 
 ```ts
-/**
- * Log entity for storing system logs
- * Represents log entries for operations and errors in the system
- */
-@Entity("logs")
-export class Log {}
+const formatHour = (hour: number): string => {
+  // 3. Output handling
+  return `${hour}:00`;
+};
 ```
 
-## For Class Properties
+Non‑trivial example (language‑agnostic structure):
 
-- Add a JSDoc comment above each property to describe its purpose, type, or constraints.
-- Do not add numbered comments (e.g., // 1., // 2.) for properties or above them.
+```pseudo
+function handle(data) {
+  // 1. Input handling
+  // 1.1 Validate shape; 1.2 Apply defaults
 
-- Example:
+  // 2. Core processing
+  // 2.1 Transform; 2.2 Persist
 
-```ts
-/**
- * Unique identifier for the log entry
- */
-@PrimaryGeneratedColumn('uuid')
-id: string;
-
-/**
- * Log level (info, warning, error)
- */
-@Column({ type: 'varchar', length: 10, nullable: false })
-level: 'info' | 'warning' | 'error';
-
-/**
- * Source of the log (component or module that generated it)
- */
-@Column({ type: 'varchar', length: 100, nullable: false })
-source: string;
-
-/**
- * Log message content
- */
-@Column({ type: 'text', nullable: false })
-message: string;
-
-/**
- * Timestamp when the log was created
- */
-@CreateDateColumn({ name: 'created_at' })
-createdAt: Date;
-```
-
-## For Class Methods
-
-- Add a JSDoc comment above each method to describe its purpose, parameters, and return value (if applicable).
-- Inside the method body, use numbered comments (e.g., // 1., // 2.) to annotate logical steps when appropriate.
-- Example:
-
-```ts
-/**
- * Getter for level
- * @returns The log level
- */
-get Level(): 'info' | 'warning' | 'error' {
-  return this.level;
-}
-
-/**
- * Setter for level
- * @param level - The log level to set (info, warning, error)
- */
-set Level(level: 'info' | 'warning' | 'error') {
-  // 1. Handle input validation
-  if (level !== 'info' && level !== 'warning' && level !== 'error') {
-    throw new Error('Invalid log level');
-  }
-
-  // 2. Assign the value
-  this.level = level;
+  // 3. Output handling
+  // 3.1 Return result
 }
 ```
 
-## Incorrect Examples (Avoid These)
+---
 
-- Do not add numbered comments above or for properties:
+## Documentation placement rules (generic)
+
+- File/module: No numeric comments. Optional brief header comment if needed.
+- Class/Type/Struct/Interface/Enum: Doc comment above declaration; describe purpose and constraints.
+- Property/Field: Doc comment above; describe purpose, type/units, constraints.
+- Function/Method: Doc comment above; describe purpose, params, return value, notable side effects.
+
+Never use numeric comments outside a function/method body.
+
+---
+
+## Language adapters (how to write doc comments)
+
+- TypeScript/JavaScript/TSX/JSX: JSDoc with `/** ... */`; use `@param`, `@returns` when helpful.
+- Python: Triple‑quoted docstrings under defs/classes; Google/NumPy style is fine; inline `# 1.` comments in bodies.
+- Go: Line doc starting with the name, e.g., `// Foo does ...`; inline `// 1.` inside functions only.
+- Java/Kotlin: Javadoc/KDoc `/** ... */` with `@param`, `@return`; inline `// 1.` inside methods only.
+- C#/C++: C# XML doc `/// <summary>...`; C++ Doxygen `///` or `/** ... */`; numeric `// 1.` only inside bodies.
+- Rust: `///` item docs; `//` inside functions for numeric comments.
+- Shell (bash/sh/pwsh): `#` header above functions; numeric `# 1.` within functions only.
+
+If a language has a project formatter configured, adhere to it.
+
+---
+
+## React/TSX specifics (when applicable)
+
+- Components: Doc above component describing purpose and props; doc each prop in its type/interface.
+- Hooks: Doc inputs/outputs and side effects. In useEffect/useMemo, add numeric comments only for multi‑step logic.
+
+Example:
+
+```tsx
+/** Renders a labeled time display. */
+type TimeProps = {
+  /** Hour in 0–23. */
+  hour: number;
+};
+
+export function TimeLabel({ hour }: TimeProps) {
+  // 3. Output handling
+  return <span>{`${hour}:00`}</span>;
+}
+```
+
+---
+
+## Async, IPC/HTTP, and error handling (all stacks)
+
+- Always structure handlers as 1 (validate/parse), 2 (do work: DB/HTTP/IPC/FS), 3 (return/respond/cleanup).
+- Node/Electron example:
+
+```ts
+ipcMain.handle('log:add', async (_e, payload) => {
+  // 1. Input handling
+  if (!payload || typeof payload.message !== 'string') throw new Error('Invalid payload');
+  // 2. Core processing
+  const id = await logService.create(payload);
+  // 3. Output handling
+  return { id };
+});
+```
+
+- Python (Flask) example:
+
+```py
+@app.post('/log/add')
+def add_log():
+    # 1. Input handling
+    body = request.get_json(silent=True) or {}
+    msg = body.get('message')
+    if not isinstance(msg, str): abort(400, 'Invalid payload')
+    # 2. Core processing
+    _id = service_create(body)
+    # 3. Output handling
+    return { 'id': _id }, 201
+```
+
+---
+
+## Do / Don’t
+
+Do
+
+- Add doc comments to declarations; use numeric comments only inside bodies.
+- Keep lines ≤ 120 chars; wrap long args/objects/strings.
+- Prefer clarity and consistency; align to nearby style.
+
+Don’t
+
+- Don’t add numbered comments at module scope, on decorators/annotations, or above properties.
+- Don’t overuse sub‑numbering; nest only when it improves clarity.
+
+Incorrect (avoid):
 
 ```ts
 // 1. Primary identification
-// 1.1 Unique identifier for the log entry
 @PrimaryGeneratedColumn('uuid')
 id: string;
-Do not group properties under numbered sections:
-ts
-// 2. Log information
-// 2.1 Timestamp when the log was created
-@CreateDateColumn()
-created_at: Date;
-Do not add numbered comments outside method bodies:
-ts
-// 1. Log information
-@Column({
-  type: 'varchar',
-  length: 10,
-  nullable: false
-})
-level: 'info' | 'warning' | 'error';
-
 ```
 
-## Additional Notes
+---
 
-- Ensure numbered comments inside methods are used only when they add clarity to the logical flow (e.g., for complex methods with distinct steps).
-- For simple methods or getters/setters with minimal logic, numbered comments may be omitted if they do not add value.
-- When generating code, prioritize consistency in comment style and structure across all classes and files.
+## Readability constraints (≤ 120 chars per line)
 
-## We use a three-section numeric comment prefix to clearly separate
+If a line would exceed 120 chars, refactor:
 
-### the three main phases of any function or code block:
+- Break argument lists across lines with trailing commas (where supported).
+- Split template literals / long strings or extract variables.
+- Spread object/record/map literals across multiple lines with aligned keys.
+- Extract intermediate variables to clarify complex expressions.
 
-1.\* → Input Handling
-• All code that deals with inputs, e.g.:
-– Parameter validation
-– Type checks and sanitization
-– Default-value setup
+---
 
-2.\* → Core Processing
-• All code where the “business logic” happens, e.g.:
-– Transformations
-– Calculations
-– Side-effects (e.g. writing to a database)
+## Consistency, conflict, and precedence
 
-3.\* → Output Handling
-• All code that produces or returns results, e.g.:
-– Return statements
-– Emitting events, console logs, or API responses
-– Final cleanup or teardown
+- Match existing repository style first; otherwise follow these rules.
+- Apply rules across all code (Electron main, renderer, scripts, services).
+- Prefer omitting numeric comments for trivial getters/setters.
 
-Numbering conventions:
-– Top-level prefixes: 1, 2, 3
-– Subsections: 1.1, 1.2, 2.1, 2.2.1, 3.1, etc.
-– Nested deeper where necessary (e.g. 1.1.1) to keep the flow clear.
+---
 
-- Example:
+## Tooling
 
-```ts
-info(message, source = 'SYSTEM') {
-  // 1. Handle input.
-  // 1.1 Validate `source`.
-  if (source !== 'SYSTEM' && source !== 'DEVICE') {
-    throw new Error('Invalid source');
-  }
+- JS/TS/TSX: Prettier enforces print width 120 (see `.prettierrc.json`).
+- Python: Use black/isort if configured.
+- Go: gofmt/goimports.
+- Rust: rustfmt.
+- Java/Kotlin: formatter/ktlint if configured.
+- C#/C++: dotnet/clang‑format if configured.
 
-  // 1.2 Validate `message`.
-  if (typeof message !== 'string') {
-    throw new Error('Invalid message');
-  }
-
-  // 2. Core processing.
-  const displaySource = sourceInChalk(source);
-  console.log(`${now()} [${chalk.green.bold('INFO')}] [${displaySource}] ${message}`);
-
-  // 3. Output result.
-  return { message, source };
-}
-```
-
-– Nested deeper only if needed (e.g. 1.1.1)
-
-- Incorrect Example:
-
-```ts
-const formatXAxisTick = (hour: number): string => {
-  // 1. Input handling – No validation needed
-  // 2. Core processing – No transformation needed
-  // 3. Output handling
-  // 3.1 Return formatted hour
-  return `${hour}:00`
-}
-```
-
-- Correct Example:
-
-```ts
-const formatXAxisTick = (hour: number): string => {
-  // 3. Output handling
-  return `${hour}:00`
-}
-```
-
-## For maintain the code readable and easy to understand.
-
-- To keep the code readable and easy to understand, we should not use the line number over 120 characters.
-- To refactor the code if it exceeds 120 lines, we should use the following steps:
-  1. Identify the code that is hard to read.
-  2. Refactor the code to be more readable.
-  3. Keep the code clean and easy to understand.
-  4. Keep the code maintainable and easy to maintain.
-  5. Keep the code easy to understand.
-  6. Keep the code easy to maintain.
+Keep code formatted consistently with project tools.

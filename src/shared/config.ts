@@ -23,14 +23,12 @@ export const config: StrictConfig = {
 
   commandAlias: {
     getAlias: createIpcChannel<void, CommandAlias[]>('CommandAlias/getKeyBindings'),
-
     addAlias: createIpcChannel<Omit<CommandAlias, 'id'>, void>('CommandAlias/addBinding'),
-
     toggleApp: createIpcChannel<number, void>('CommandAlias/triggerAction'),
-
     hideCommandPalette: createIpcChannel<void, void>('CommandAlias/hideCommandPalette'),
-
     subscribeToAlias: createSubscriptionChannel<CommandAlias[]>('CommandAlias/subscribeToKeyBindings'),
+    setAutoLaunch: createIpcChannel<boolean, void>('CommandAlias/setAutoLaunch'),
+    getAutoLaunchStatus: createIpcChannel<void, boolean>('CommandAlias/getAutoLaunchStatus'),
   },
 
   apps: {

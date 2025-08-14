@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import logoSvg from '../../assets/logo.svg';
 import type { CommandAlias } from '../../../main/database/entities/CommandAlias';
-import { AddBindingModal } from '../../components/AddBindingModal';
+import { AddBindingModal } from '../../components/AddBindingModal/AddBindingModal';
+import { productName } from '../../../../package.json';
+import { IoMdAdd } from 'react-icons/io';
+import { TypeFilterSelect, type BindingTypeFilter } from '../../components/TypeFilterSelect';
 
 type KeyCapProps = {
   /** Label to display inside the keycap. */
@@ -14,7 +17,7 @@ type KeyCapProps = {
 const KeyCap = ({ label }: KeyCapProps) => {
   // 3. Output handling: present a styled key label
   return (
-    <span className="inline-flex min-w-[1rem] items-center justify-center rounded border border-gray-300 bg-gray-100 px-1 font-mono text-xs leading-5 text-gray-800 shadow-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
+    <span className="inline-flex min-w-[1rem] items-center justify-center rounded-md border border-gray-300 bg-gray-100 px-1 font-mono text-xs leading-5 text-gray-800 shadow-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
       {label}
     </span>
   );
@@ -26,7 +29,7 @@ type ShortcutsProps = {
 };
 
 /**
- * Displays a sequence like "c o d e" as individual keycaps per letter.
+ * Displays a alias like "c o d e" as individual keycaps per letter.
  */
 const ShortcutRender = ({ value }: ShortcutsProps) => {
   // 1. Input handling: split into characters and ignore spaces
@@ -66,9 +69,9 @@ const getTypeLabel = (type: CommandAlias['actionType']): string => {
  */
 export const Home = () => {
   const [bindings, setBindings] = useState<CommandAlias[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(true);
   const [filterText, setFilterText] = useState('');
-  const [typeFilter, setTypeFilter] = useState<'all' | 'launch-app' | 'run-command' | 'execute-script'>('all');
+  const [typeFilter, setTypeFilter] = useState<BindingTypeFilter>('all');
 
   const loadBindings = async () => {
     try {
@@ -99,7 +102,7 @@ export const Home = () => {
     return bindings.filter(b => {
       if (typeFilter !== 'all' && b.actionType !== typeFilter) return false;
       if (!q) return true;
-      const hay = `${b.sequence} ${b.target ?? ''} ${b.comment ?? ''}`.toLowerCase();
+      const hay = `${b.alias} ${b.target ?? ''} ${b.comment ?? ''}`.toLowerCase();
       return hay.includes(q);
     });
   })();
@@ -112,53 +115,25 @@ export const Home = () => {
         <div className="mb-4 flex items-center justify-between gap-3 bg-white/60 px-3 py-2 backdrop-blur-sm dark:border-white/5 dark:bg-gray-900/60">
           <h1 className="flex items-center gap-3 text-xl font-semibold">
             <img src={logoSvg} alt="Command Alias logo" className="h-7 w-7" />
-            <span>Command Alias</span>
+            <span className="dark:text-white">{productName}</span>
           </h1>
           <div className="flex items-center gap-2">
+            <TypeFilterSelect value={typeFilter} onChange={setTypeFilter} />
             <input
               type="text"
               value={filterText}
               onChange={e => setFilterText(e.target.value)}
               placeholder="Search"
-              className="h-9 w-72 rounded-full border border-black/10 bg-white/80 px-3.5 text-sm placeholder-gray-400 outline-none focus:border-[#0A84FF] focus:ring-2 focus:ring-[#0A84FF]/30 dark:border-white/10 dark:bg-gray-800/70 dark:text-gray-100 dark:placeholder-gray-500"
+              className="h-9 w-72 rounded-md border border-black/10 bg-white/80 px-3.5 text-sm placeholder-gray-400 outline-none focus:border-[#0A84FF] focus:ring-2 focus:ring-[#0A84FF]/30 dark:border-white/10 dark:bg-gray-800/70 dark:text-gray-100 dark:placeholder-gray-500"
             />
-            <div className="inline-flex items-center rounded-full border border-black/10 bg-white/70 p-0.5 dark:border-white/10 dark:bg-gray-800/70">
-              {(
-                [
-                  { k: 'all', label: 'All' },
-                  { k: 'launch-app', label: 'App' },
-                  { k: 'run-command', label: 'Cmd' },
-                  { k: 'execute-script', label: 'Script' },
-                ] as const
-              ).map(seg => (
-                <button
-                  key={seg.k}
-                  type="button"
-                  onClick={() => setTypeFilter(seg.k)}
-                  aria-pressed={typeFilter === seg.k}
-                  className={[
-                    'relative rounded-full px-3 py-1.5 text-sm transition-colors focus:outline-none',
-                    typeFilter === seg.k
-                      ? 'bg-[#0A84FF] text-white shadow-sm'
-                      : 'text-gray-700 hover:bg-black/5 dark:text-gray-200 dark:hover:bg-white/10',
-                  ].join(' ')}
-                >
-                  {seg.label}
-                </button>
-              ))}
-            </div>
-            <button
-              type="button"
-              onClick={() => setIsModalOpen(true)}
-              className="h-9 rounded-full bg-[#0A84FF] px-4 text-sm font-semibold text-white shadow hover:bg-[#0a7af0] focus:outline-none focus:ring-2 focus:ring-[#0A84FF]/30"
-            >
-              Add
+            <button type="button" onClick={() => setIsModalOpen(true)} className="">
+              <IoMdAdd className="h-6 w-6" />
             </button>
           </div>
         </div>
 
         {/* CommandPalette-style list */}
-        <div className="mb-4 overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+        <div className="mb-4 overflow-hidden rounded-md border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
           {/* Header row */}
           <div className="grid grid-cols-12 gap-4 border-b border-gray-200 px-4 py-2 text-xs font-semibold uppercase text-gray-500 dark:border-gray-700 dark:text-gray-400">
             <div className="col-span-3">Alias</div>
@@ -177,12 +152,12 @@ export const Home = () => {
                 className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 px-4 py-3 text-sm hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800/60"
               >
                 <span className="col-span-3 font-mono text-gray-900 dark:text-gray-100">
-                  <ShortcutRender value={binding.sequence} />
+                  <ShortcutRender value={binding.alias} />
                 </span>
                 <span className="col-span-5 truncate text-gray-700 dark:text-gray-300" title={binding.target || ''}>
                   {binding.target || '-'}
                 </span>
-                <span className="col-span-2 inline-flex w-fit items-center justify-center rounded-full bg-blue-50 px-2 py-0.5 text-center text-xs text-blue-700 dark:bg-blue-900/30 dark:text-blue-200">
+                <span className="col-span-2 inline-flex w-fit items-center justify-center rounded-md bg-blue-50 px-2 py-0.5 text-center text-xs text-blue-700 dark:bg-blue-900/30 dark:text-blue-200">
                   {getTypeLabel(binding.actionType)}
                 </span>
                 <span className="col-span-2 truncate text-gray-600 dark:text-gray-400" title={binding.comment || ''}>

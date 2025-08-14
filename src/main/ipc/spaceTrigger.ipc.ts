@@ -21,7 +21,7 @@ config.commandAlias.getAlias.handle(async () => {
 config.commandAlias.addAlias.handle(async binding => {
   try {
     // 1. Input handling - Validate binding
-    if (!binding || !binding.sequence || !binding.actionType) {
+    if (!binding || !binding.alias || !binding.actionType) {
       throw new Error('Invalid binding');
     }
 

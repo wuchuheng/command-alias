@@ -3,18 +3,18 @@ import { CommandAlias } from 'src/main/database/entities/CommandAlias';
 
 /**
  * CommandPalette renders the Notice UI overlay that lists key bindings and filters them in real-time
- * as the user types. It displays columns: Sequence, Target path/command, Type, and Comment.
+ * as the user types. It displays columns: alias, Target path/command, Type, and Comment.
  */
 export default function CommandPalette() {
   const [bindings, setBindings] = useState<CommandAlias[]>([]);
   const [filter, setFilter] = useState('');
 
   /**
-   * Normalize a key sequence by removing spaces and lowering case for comparisons.
-   * @param value - Raw user input or stored sequence (e.g., "c o d e")
+   * Normalize a key alias by removing spaces and lowering case for comparisons.
+   * @param value - Raw user input or stored alias (e.g., "c o d e")
    * @returns Normalized string (e.g., "code")
    */
-  const normalizeSequence = (value: string): string => value.replace(/\s+/g, '').toLowerCase();
+  const normalizealias = (value: string): string => value.replace(/\s+/g, '').toLowerCase();
 
   /**
    * Convert an action type to a concise label.
@@ -55,8 +55,8 @@ export default function CommandPalette() {
     };
   }, []);
 
-  const normalizedFilter = normalizeSequence(filter);
-  const filteredBindings = bindings.filter(b => normalizeSequence(b.sequence).startsWith(normalizedFilter));
+  const normalizedFilter = normalizealias(filter);
+  const filteredBindings = bindings.filter(b => normalizealias(b.alias).startsWith(normalizedFilter));
 
   const onChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     // 1. Input handling: capture the latest text
@@ -64,7 +64,7 @@ export default function CommandPalette() {
     setFilter(newValue);
 
     // 2. Core processing: check if any binding matches exactly (prefix fully typed)
-    const matchedHotkey = bindings.find(item => normalizeSequence(item.sequence) === normalizeSequence(newValue));
+    const matchedHotkey = bindings.find(item => normalizealias(item.alias) === normalizealias(newValue));
     if (!matchedHotkey) return;
 
     // 3. Output handling: execute and close overlay
@@ -118,7 +118,7 @@ export default function CommandPalette() {
           borderTopRightRadius: borderRadius,
         }}
         className="w-full rounded-t-lg border-b border-gray-200 p-4 text-gray-900 placeholder-gray-400 outline-none dark:border-gray-700 dark:text-gray-100"
-        placeholder="Type a shortcut sequence (e.g., c o d e). Press Esc to close"
+        placeholder="Type a shortcut alias (e.g., c o d e). Press Esc to close"
         value={filter}
         onChange={onChange}
         autoFocus
@@ -142,7 +142,7 @@ export default function CommandPalette() {
               className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 px-4 py-3 text-sm hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800/60"
             >
               <span className="col-span-3 font-mono text-gray-900 dark:text-gray-100">
-                <ShortcutRender value={binding.sequence} currentInputChar={filter} />
+                <ShortcutRender value={binding.alias} currentInputChar={filter} />
               </span>
               <span className="col-span-5 truncate text-gray-700 dark:text-gray-300" title={binding.target}>
                 {binding.target}
@@ -195,7 +195,7 @@ type ShortcutsProps = {
 };
 
 /**
- * ShortcutRender displays a sequence like "c o d e" as individual keycaps per letter.
+ * ShortcutRender displays a alias like "c o d e" as individual keycaps per letter.
  */
 const ShortcutRender: React.FC<ShortcutsProps> = ({ value, currentInputChar }) => {
   // 1. Input handling: split into characters and ignore spaces

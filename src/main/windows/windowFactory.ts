@@ -4,6 +4,10 @@ import { logger } from '../utils/logger';
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 
+/**
+ *  Create the main application window.
+ * @returns The created BrowserWindow instance.
+ */
 export const createWindow = (): BrowserWindow => {
   logger.info('Creating main window');
 
@@ -13,8 +17,8 @@ export const createWindow = (): BrowserWindow => {
     logger.info(`Main window entry: ${MAIN_WINDOW_WEBPACK_ENTRY}`);
 
     const mainWindow = new BrowserWindow({
-      height: 800 * 1.5,
-      width: 1200 * 1.5,
+      height: 800 * 0.7,
+      width: 1200 * 0.7,
       webPreferences: {
         preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
         contextIsolation: true,

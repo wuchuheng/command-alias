@@ -1,13 +1,12 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-// TODO: Rename the KeyBinding to CommandAlias
-@Entity('key_binding')
+@Entity()
 export class CommandAlias {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ type: 'varchar', length: 50 })
-  sequence: string;
+  alias: string;
 
   @Column({ type: 'varchar', length: 20 })
   actionType: 'launch-app' | 'run-command' | 'execute-script';

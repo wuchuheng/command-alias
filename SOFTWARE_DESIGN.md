@@ -2,20 +2,20 @@
 
 ## 1. Introduction
 
-CommandAlias is a cross-platform keyboard shortcut launcher application inspired by CommandAlias for macOS. The application allows users to configure custom keyboard sequences to rapidly launch applications, execute commands, and streamline workflows.
+CommandAlias is a cross-platform keyboard shortcut launcher application inspired by CommandAlias for macOS. The application allows users to configure custom keyboard alias to rapidly launch applications, execute commands, and streamline workflows.
 
 ### Core Features
 
-- **Key Sequence Binding**: Map custom keyboard sequences to applications or commands
+- **Key alias Binding**: Map custom keyboard alias to applications or commands
 - **Cross-Platform Support**: Windows, macOS, and Linux compatibility
-- **Real-Time Feedback**: Visual indication during key sequence entry
+- **Real-Time Feedback**: Visual indication during key alias entry
 - **Configuration Management**: Centralized dashboard for all key bindings
 - **Performance Optimization**: Low-latency execution of bound commands
 
 ### User Interaction Workflow
 
 1. **Trigger**: User presses the configurable prefix key (default: `Space`)
-2. **Input**: User enters the bound key sequence
+2. **Input**: User enters the bound key alias
 3. **Visual Feedback**: Dialog UI shows matching commands in real-time
 4. **Execution**: System launches the selected application or executes command
 
@@ -27,7 +27,7 @@ CommandAlias is a cross-platform keyboard shortcut launcher application inspired
   - Prefix key customization
   - Activation delay settings
   - Binding comments/descriptions
-- **Dialog UI**: Minimalist overlay that appears during key sequence entry:
+- **Dialog UI**: Minimalist overlay that appears during key alias entry:
   - Shows matching commands as user types
   - Provides visual feedback for partial matches
   - Auto-completes commands when unique match exists
@@ -37,7 +37,7 @@ CommandAlias is a cross-platform keyboard shortcut launcher application inspired
 Bindings consist of three core elements:
 
 1. **Prefix Key**: Configurable activation key (default: Space)
-2. **Command Sequence**: Unique key combination that triggers action
+2. **Command alias**: Unique key combination that triggers action
 3. **Target Action**: Either:
    - Application launch with specified path
    - System command execution
@@ -47,7 +47,7 @@ Example binding:
 
 ```yaml
 - prefix: Space
-  sequence: "c o d e"
+  alias: "c o d e"
   action:
     type: "launch-app"
     path: "C:\Program Files\Microsoft VS Code\Code.exe"
@@ -66,7 +66,7 @@ Example binding:
   - Dialog UI appears centered on screen
   - Displays all available commands in format:
     ```
-    [Sequence] [Application Path] [Type] [Comments]
+    [alias] [Application Path] [Type] [Comments]
     ```
   - Example display:
     ```
@@ -75,7 +75,7 @@ Example binding:
     ```
 - **Real-time Filtering**:
   - As user types additional keys after Space, the list dynamically filters
-  - Only shows commands starting with the typed sequence
+  - Only shows commands starting with the typed alias
   - Example:
     - `Space` + `c` → shows only commands starting with 'c'
     - `Space` + `c` + `o` → shows only commands starting with 'co'
@@ -123,7 +123,7 @@ Example binding:
    - Requests are routed through preload script to main process
 2. **Main → Renderer**:
    - Service layer processes requests and returns data/responses
-   - Event subscriptions push real-time updates to renderer (e.g., key sequence tracking)
+   - Event subscriptions push real-time updates to renderer (e.g., key alias tracking)
 3. **Data Flow**:
    - Configuration changes and key bindings persist to SQLite database
    - All cross-process communication is strictly typed for safety
@@ -143,7 +143,7 @@ declare global {
         setDelay: (delay: number) => Promise<void>;
         getKeyBindings: () => Promise<KeyBinding[]>;
         addBinding: (binding: Omit<KeyBinding, 'id'>) => Promise<KeyBinding>;
-        onSequenceUpdate: (callback: (sequence: string[]) => void) => () => void;
+        onaliasUpdate: (callback: (alias: string[]) => void) => () => void;
       };
     };
   }
@@ -166,7 +166,7 @@ export const config: StrictConfig = {
     setDelay: createIpcChannel<number, void>('CommandAlias/setDelay'),
     getKeyBindings: createIpcChannel<void, KeyBinding[]>('CommandAlias/getKeyBindings'),
     addBinding: createIpcChannel<Omit<KeyBinding, 'id'>, KeyBinding>('CommandAlias/addBinding'),
-    onSequenceUpdate: createSubscriptionChannel<string[]>('CommandAlias/onSequenceUpdate'),
+    onaliasUpdate: createSubscriptionChannel<string[]>('CommandAlias/onaliasUpdate'),
   },
 };
 ```
@@ -261,7 +261,7 @@ CommandAlias features two core interfaces that facilitate distinct user interact
 ║                                                           ║
 ║  Key Bindings                                             ║
 ║  ┌───────────────┬───────────────┬──────────────────────┐ ║
-║  │ Sequence      │ Action        │ Comment              │ ║
+║  │ alias      │ Action        │ Comment              │ ║
 ║  ├───────────────┼───────────────┼──────────────────────┤ ║
 ║  │ c o d e       │ Launch App    │ VS Code Editor       │ ║
 ║  │ a             │ Launch App    │ Android Studio       │ ║
@@ -284,7 +284,7 @@ CommandAlias features two core interfaces that facilitate distinct user interact
   3. User types additional keys to filter options
   4. UI updates dynamically showing matches
   5. Actions:
-     - Complete sequence → execute command
+     - Complete alias → execute command
      - Release Space → cancel without action
 
 **Visual Representation**:
@@ -316,7 +316,7 @@ Types 'o'            ▶ Filters to commands starting with 'co'
                      │
 Releases Space       ▶ Closes Notice UI (no action)
 or                   │
-Completes sequence   ▶ Executes command
+Completes alias   ▶ Executes command
                      ▶ Closes Notice UI
 ```
 
@@ -332,7 +332,7 @@ export class KeyBinding {
   id: string;
 
   @Column({ type: 'varchar', length: 50 })
-  sequence: string; // Formatted as "c o d e"
+  alias: string; // Formatted as "c o d e"
 
   @Column({ type: 'varchar', length: 20 })
   actionType: 'launch-app' | 'run-command' | 'execute-script';

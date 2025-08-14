@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { MakerDeb } from '@electron-forge/maker-deb';
 import { MakerRpm } from '@electron-forge/maker-rpm';
 import { MakerSquirrel } from '@electron-forge/maker-squirrel';
@@ -18,6 +19,7 @@ const config: ForgeConfig = {
   packagerConfig: {
     icon: path.join(iconDir, 'icon'),
     asar: true,
+    extraResource: ['./src/renderer/assets/'],
   },
   rebuildConfig: {},
   makers: [
@@ -45,8 +47,6 @@ const config: ForgeConfig = {
         ],
       },
     }),
-    // Fuses are used to enable/disable various Electron functionality
-    // at package time, before code signing the application
     new FusesPlugin({
       version: FuseVersion.V1,
       [FuseV1Options.RunAsNode]: false,

@@ -15,7 +15,7 @@ export const getAlias = async (): Promise<CommandAlias[]> => {
 
     // 2. Core processing - Fetch all key bindings
     const bindings = await keyBindingRepository.find({
-      order: { sequence: 'ASC' },
+      order: { alias: 'ASC' },
     });
 
     // 3. Output handling

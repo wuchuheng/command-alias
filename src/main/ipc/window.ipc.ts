@@ -1,36 +1,17 @@
 import { config } from '../../shared/config';
-import { getMainWindow } from '../main';
+import * as mainWindowService from '../services/mainWindowManager.service';
 
 /**
  * Minimize window
  */
-config.window.minimize.handle(async () => {
-  const mainWindow = getMainWindow();
-  if (mainWindow && !mainWindow.isDestroyed()) {
-    mainWindow.minimize();
-  }
-});
+config.window.minimize.handle(async () => mainWindowService.minimize());
 
 /**
  * Maximize/restore window
  */
-config.window.maximize.handle(async () => {
-  const mainWindow = getMainWindow();
-  if (mainWindow && !mainWindow.isDestroyed()) {
-    if (mainWindow.isMaximized()) {
-      mainWindow.unmaximize();
-    } else {
-      mainWindow.maximize();
-    }
-  }
-});
+config.window.maximize.handle(async () => mainWindowService.maximize());
 
 /**
  * Close window
  */
-config.window.close.handle(async () => {
-  const mainWindow = getMainWindow();
-  if (mainWindow && !mainWindow.isDestroyed()) {
-    mainWindow.close();
-  }
-});
+config.window.close.handle(async () => mainWindowService.hide());
