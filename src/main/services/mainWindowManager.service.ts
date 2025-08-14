@@ -9,6 +9,14 @@ import { logger } from '../utils/logger';
 
 let mainWindow: BrowserWindow | null = null;
 
+const closeEventIntercept = (e: Electron.Event) => {
+  if (mainWindow) {
+    e.preventDefault();
+    logger.info(`The close event was triggered, but the main window is hidden instead of closed`);
+    mainWindow.hide();
+  }
+};
+
 /**
  * Creates a managed main window if it doesn't already exist.
  * @returns {BrowserWindow }
@@ -20,6 +28,8 @@ export const create = (): BrowserWindow => {
   }
   logger.info('Creating main window');
   mainWindow = createWindow();
+
+  mainWindow.on('close', closeEventIntercept);
 
   return mainWindow;
 };
@@ -38,10 +48,8 @@ export const getMainWindow = (): BrowserWindow => {
  */
 export const close = (): void => {
   if (mainWindow) {
-    logger.info('Closing main window');
-
-    mainWindow.close();
-    mainWindow = null;
+    logger.info('Hiding main window instead of closing');
+    mainWindow.hide();
     return;
   }
 
@@ -84,4 +92,20 @@ export const maximize = (): void => {
   logger.info('Maximizing main window');
 
   mainWindow.maximize();
+};
+
+/**
+ * Force closes the main window if it exists.
+ * @returns {void}
+ */
+export const forceClose = (): void => {
+  if (!mainWindow) {
+    logger.warn('No main window to force close');
+    return;
+  }
+  logger.info('Force closing main window');
+
+  mainWindow.removeListener('close', closeEventIntercept);
+  mainWindow.close();
+  mainWindow = null;
 };

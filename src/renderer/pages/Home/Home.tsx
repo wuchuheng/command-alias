@@ -69,7 +69,7 @@ const getTypeLabel = (type: CommandAlias['actionType']): string => {
  */
 export const Home = () => {
   const [bindings, setBindings] = useState<CommandAlias[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [filterText, setFilterText] = useState('');
   const [typeFilter, setTypeFilter] = useState<BindingTypeFilter>('all');
 

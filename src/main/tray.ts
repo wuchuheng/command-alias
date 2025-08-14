@@ -2,6 +2,7 @@ import { Tray, Menu, nativeImage, app, BrowserWindow } from 'electron';
 import path from 'path';
 import fs from 'fs';
 import { logger } from './utils/logger';
+import * as mainWindowService from '@/main/services/mainWindowManager.service';
 
 let tray: Tray | null = null;
 
@@ -38,6 +39,7 @@ export function createTray(mainWindow: BrowserWindow) {
     {
       label: 'Quit',
       click: () => {
+        mainWindowService.forceClose();
         (app as any).isQuitting = true;
         app.quit();
       },
