@@ -3,7 +3,7 @@ import { setupAllIpcHandlers } from './ipc';
 import { bootload } from './services/bootload.service';
 import { initDB } from './database/data-source';
 import * as globalHotKey from './services/hotkey.service';
-import { createTray } from './tray';
+import { createTray } from './services/tray.service/tray.service';
 
 import { logger } from './utils/logger';
 import * as mainWindowService from '@/main/services/mainWindowManager.service';

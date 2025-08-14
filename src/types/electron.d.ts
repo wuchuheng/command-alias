@@ -1,5 +1,5 @@
-import { CommandAlias } from 'src/main/database/entities/CommandAlias';
-import { Welcome } from 'src/main/database/entities/welcom';
+import { CommandAlias } from '@/main/database/entities/CommandAlias';
+import { Welcome } from '@/main/database/entities/welcom';
 
 export type Pagination<T> = {
   page: number;

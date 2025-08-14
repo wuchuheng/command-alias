@@ -4,8 +4,8 @@ import sharp from 'sharp';
 
 /**
  * Generate logo.png (1024x1024) from the vector SVG logo.
- * - Input: src/renderer/assets/logo.svg
- * - Output: src/renderer/assets/logo.png (overwrites if exists)
+ * - Input: @/renderer/assets/logo.svg
+ * - Output: @/renderer/assets/logo.png (overwrites if exists)
  */
 async function main(): Promise<void> {
   // 1. Input handling

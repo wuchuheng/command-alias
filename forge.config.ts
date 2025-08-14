@@ -13,7 +13,7 @@ import { mainConfig } from './webpack.main.config';
 import { rendererConfig } from './webpack.renderer.config';
 import path from 'path';
 
-const iconDir = path.join(__dirname, 'src/renderer/assets/genLogo');
+const iconDir = path.join(__dirname, '@/renderer/assets/genLogo');
 
 const config: ForgeConfig = {
   packagerConfig: {

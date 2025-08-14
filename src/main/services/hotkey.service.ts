@@ -59,3 +59,22 @@ export const hideCommandPalette = async () => {
     commandPaletteWindow.hide();
   }
 };
+
+/**
+ * Show the command palette window, creating it if necessary.
+ */
+export const showCommandPalette = () => {
+  logger.info('Showing command palette via programmatic call');
+  if (commandPaletteWindow && commandPaletteWindow.isVisible()) {
+    commandPaletteWindow.focus();
+  } else {
+    if (!commandPaletteWindow) {
+      commandPaletteWindow = createCommandPaletteWindow();
+      commandPaletteWindow.on('closed', () => {
+        commandPaletteWindow = null;
+      });
+    }
+    commandPaletteWindow.show();
+    commandPaletteWindow.focus();
+  }
+};

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { CommandAlias } from 'src/main/database/entities/CommandAlias';
+import { CommandAlias } from '@/main/database/entities/CommandAlias';
 
 /**
  * CommandPalette renders the Notice UI overlay that lists key bindings and filters them in real-time
