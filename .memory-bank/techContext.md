@@ -18,6 +18,7 @@ _Technologies used, development setup, and technical constraints_
 - **Node.js**: Server-side JavaScript runtime
 - **TypeORM 0.3.24**: Object-relational mapping for database operations
 - **Better SQLite3 11.10.0**: Fast, synchronous SQLite interface
+- **Sharp 0.33.5**: High-performance image processing for SVG-to-PNG conversion
 - **Auto-Launch 5.0.6**: System startup integration
 
 ### Development Environment

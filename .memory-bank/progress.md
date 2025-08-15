@@ -18,9 +18,9 @@ _What works, what's left to build, current status, and known issues_
 
 - **Windows Process Detection**: PowerShell-based process checking
 - **Window Management**: Focus existing apps vs. launching new instances
-- **System Tray**: Tray icon with context menu
+- **System Tray**: Cross-platform tray icon with SVG-based rendering (in progress)
 - **Auto-launch Support**: System startup integration
-- **Icon Generation**: SVG to platform-specific icon conversion
+- **Icon Generation**: Enhanced SVG to platform-specific icon conversion with Sharp
 
 ### ✅ **Architecture Foundations**
 
@@ -54,6 +54,12 @@ _What works, what's left to build, current status, and known issues_
 - **Formatted Code**: Prettier + ESLint integration working correctly
 
 ## Known Technical Debt
+
+### **Active Issues**
+
+- **macOS Tray Icon Quality**: Black square display instead of clean SVG-based icon
+- **TypeScript Integration**: Sharp library async function handling in tray service
+- **Icon Generation Pipeline**: Need runtime SVG conversion for optimal quality
 
 ### **Minor Issues**
 
@@ -104,15 +110,15 @@ _What works, what's left to build, current status, and known issues_
 
 ### **Immediate (Next Sprint)**
 
-1. **Code Cleanup**: Consolidate dual entity models
-2. **UI Enhancement**: Add keyboard navigation to command palette
-3. **Documentation**: Update SOFTWARE_DESIGN.md to match current implementation
+1. **Tray Icon Quality**: Complete SVG-based tray icon implementation for crisp rendering
+2. **Cross-Platform Testing**: Verify icon quality across macOS, Windows, Linux
+3. **Code Cleanup**: Consolidate dual entity models and resolve TypeScript warnings
 
 ### **Short-term (1-2 Months)**
 
-1. **macOS/Linux Support**: Platform-specific process detection
-2. **Settings Panel**: Configuration UI for global preferences
-3. **Advanced Features**: Import/export, usage statistics
+1. **Template Image Support**: Proper dark/light mode adaptation for tray icons
+2. **macOS/Linux Support**: Platform-specific process detection beyond Windows
+3. **Settings Panel**: Configuration UI for global preferences
 
 ### **Long-term Vision**
 

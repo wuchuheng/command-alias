@@ -169,6 +169,28 @@ async function isProcessRunning(executableName: string): Promise<boolean> {
 2. **Branch Logic**: Launch new instance OR bring to foreground
 3. **Error Handling**: Graceful fallbacks for launch failures
 
+### Tray Icon Management
+
+```typescript
+// SVG-based runtime conversion for crisp rendering
+async function createSvgTrayIcon(size: number): Promise<Electron.NativeImage | null> {
+  const pngBuffer = await sharp(svgPath)
+    .resize(size, size, {
+      fit: 'contain',
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+      kernel: sharp.kernel.lanczos3, // High-quality scaling
+    })
+    .png({ quality: 100, compressionLevel: 9 })
+    .toBuffer();
+
+  return nativeImage.createFromBuffer(pngBuffer);
+}
+
+// Platform-specific tray icon strategy
+// macOS: SVG-based conversion for quality
+// Windows/Linux: Pre-generated PNG files
+```
+
 ## Data Flow Patterns
 
 ### Command Execution Flow
