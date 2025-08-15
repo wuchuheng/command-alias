@@ -46,7 +46,7 @@ export function createMainActionMenuItems(
 }
 
 /**
- * Creates the settings submenu for the tray.
+ * Creates the settings submenu for the tray with platform-aware labels.
  * @param mainWindow - The main application window
  * @param autoLaunchEnabled - Whether auto-launch is currently enabled
  */
@@ -54,9 +54,25 @@ export function createSettingsSubmenu(
   mainWindow: BrowserWindow,
   autoLaunchEnabled: boolean
 ): Electron.MenuItemConstructorOptions[] {
+  const platform = process.platform;
+  let startupLabel: string;
+
+  // Platform-specific startup labels
+  switch (platform) {
+    case 'darwin':
+      startupLabel = autoLaunchEnabled ? '✅ Start with macOS' : '⭕ Start with macOS';
+      break;
+    case 'win32':
+      startupLabel = autoLaunchEnabled ? '✅ Start with Windows' : '⭕ Start with Windows';
+      break;
+    default:
+      startupLabel = autoLaunchEnabled ? '✅ Start with System' : '⭕ Start with System';
+      break;
+  }
+
   return [
     {
-      label: autoLaunchEnabled ? '✅ Start with Windows' : '⭕ Start with Windows',
+      label: startupLabel,
       click: () => handleToggleAutoLaunch(autoLaunchEnabled, mainWindow),
     },
     { type: 'separator' },
@@ -106,9 +122,11 @@ export function createHelpSubmenu(mainWindow: BrowserWindow): Electron.MenuItemC
 }
 
 /**
- * Creates the footer menu items (restart and quit).
+ * Creates the footer menu items (restart and quit) with platform-aware shortcuts.
  */
 export function createFooterMenuItems(): Electron.MenuItemConstructorOptions[] {
+  const isMac = process.platform === 'darwin';
+
   return [
     { type: 'separator' },
     {
@@ -118,7 +136,7 @@ export function createFooterMenuItems(): Electron.MenuItemConstructorOptions[] {
     {
       label: '❌ Quit',
       click: () => handleQuitApplication(),
-      accelerator: 'Ctrl+Q',
+      accelerator: isMac ? 'Cmd+Q' : 'Ctrl+Q',
     },
   ];
 }

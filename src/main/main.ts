@@ -20,7 +20,7 @@ app.on('ready', async () => {
   // 2. Handle the logic.
   // 2.1 Create the main window and tray
   const mainWindow = mainWindowService.create();
-  mainWindowService.hide();
+  // mainWindowService.hide();
 
   createTray(mainWindow);
 

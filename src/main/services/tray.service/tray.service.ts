@@ -38,10 +38,12 @@ export function createTray(mainWindow: BrowserWindow) {
   // 2.1 Build comprehensive context menu
   buildContextMenu(mainWindow);
 
-  // 2.2 Setup tray interactions
-  tray.setToolTip(`${productName} - Ctrl+Space to open command palette`);
+  // 2.2 Setup tray interactions with platform-aware tooltip
+  const platform = process.platform;
+  const shortcutText = platform === 'darwin' ? 'Ctrl+Space' : 'Ctrl+Space';
+  tray.setToolTip(`${productName} - ${shortcutText} to open command palette`);
 
-  // 2.3 Handle tray click events
+  // 2.3 Handle tray click events with cross-platform support
   setupTrayEventHandlers(mainWindow);
 
   // 3. Output handling
@@ -49,50 +51,114 @@ export function createTray(mainWindow: BrowserWindow) {
 }
 
 /**
- * Creates the tray icon with fallback handling.
+ * Creates the tray icon with cross-platform support and proper sizing.
+ * Uses dedicated tray icons optimized for each platform.
  * @returns The native image for the tray icon, or null if failed
  */
 function createTrayIcon(): Electron.NativeImage | null {
-  // 1. Input handling - Determine icon path
+  // 1. Input handling - Determine platform-specific tray icon path
+  const platform = process.platform;
   let iconPath: string;
+
   if (app.isPackaged) {
-    iconPath = path.join(process.resourcesPath, 'assets/genLogo/icon.png');
+    // 1.1 Production: Use platform-specific tray icons with size indicators
+    switch (platform) {
+      case 'darwin':
+        iconPath = path.join(process.resourcesPath, 'assets/genLogo/tray/tray-icon-darwin-16x16.png');
+        break;
+      case 'win32':
+        iconPath = path.join(process.resourcesPath, 'assets/genLogo/tray/tray-icon-win32-16x16.png');
+        break;
+      default: // linux and others
+        iconPath = path.join(process.resourcesPath, 'assets/genLogo/tray/tray-icon-linux-22x22.png');
+        break;
+    }
   } else {
-    iconPath = path.join(__dirname, '../../src/renderer/assets/genLogo/icon.png');
+    // 1.2 Development: Use platform-specific tray icons with size indicators
+    switch (platform) {
+      case 'darwin':
+        iconPath = path.join(__dirname, '../../src/renderer/assets/genLogo/tray/tray-icon-darwin-16x16.png');
+        break;
+      case 'win32':
+        iconPath = path.join(__dirname, '../../src/renderer/assets/genLogo/tray/tray-icon-win32-16x16.png');
+        break;
+      default: // linux and others
+        iconPath = path.join(__dirname, '../../src/renderer/assets/genLogo/tray/tray-icon-linux-22x22.png');
+        break;
+    }
   }
 
-  logger.info(`Tray icon path: ${iconPath}`);
+  logger.info(`Tray icon path (${platform}): ${iconPath}`);
 
+  // 1.3 Check if tray icon exists, with intelligent fallback strategy
   if (!fs.existsSync(iconPath)) {
-    logger.error(`Tray icon not found at ${iconPath}`);
+    logger.warn(`Platform-specific tray icon not found: ${iconPath}`);
+
+    // Fallback to universal tray icon with size indicator
+    const universalPath = app.isPackaged
+      ? path.join(process.resourcesPath, 'assets/genLogo/tray/tray-icon-22x22.png')
+      : path.join(__dirname, '../../src/renderer/assets/genLogo/tray/tray-icon-22x22.png');
+    if (fs.existsSync(universalPath)) {
+      logger.info(`Using universal tray icon: ${universalPath}`);
+      iconPath = universalPath;
+    } else {
+      logger.error(`No suitable tray icon found. Checked: ${iconPath}, ${universalPath}`);
+      logger.error('Please run "npm run gen:tray-icons" to generate tray icons');
+      return null;
+    }
   }
 
-  // 2. Core processing - Create icon with fallback
+  // 2. Core processing - Create icon with platform-specific configuration
   try {
     const icon = nativeImage.createFromPath(iconPath);
+    const iconSize = icon.getSize();
+
+    logger.info(`Tray icon loaded: ${iconSize.width}x${iconSize.height}, empty=${icon.isEmpty()}`);
+
     if (icon.isEmpty()) {
-      logger.warn('Tray icon is empty, creating fallback');
-      return nativeImage.createEmpty();
+      logger.error(`Tray icon is empty: ${iconPath}`);
+      return null;
     }
+
+    // 2.1 Configure macOS template image for proper dark/light mode adaptation
+    if (platform === 'darwin') {
+      icon.setTemplateImage(true);
+      logger.info('Set template image for macOS tray icon');
+    }
+
     return icon;
   } catch (error) {
     logger.error('Failed to load tray icon:', error);
-    return nativeImage.createEmpty();
+    return null;
   }
 }
 
 /**
- * Sets up event handlers for tray interactions.
+ * Sets up event handlers for tray interactions with cross-platform support.
  * @param mainWindow - The main application window
  */
 function setupTrayEventHandlers(mainWindow: BrowserWindow): void {
   if (!tray) return;
 
-  // Handle left click - show main window
+  const platform = process.platform;
+
+  // Handle left click - behavior varies by platform
   tray.on('click', () => {
     logger.info('Tray icon clicked - showing main window');
-    mainWindow.show();
-    mainWindow.focus();
+
+    if (platform === 'darwin') {
+      // macOS: Toggle window visibility on click
+      if (mainWindow.isVisible()) {
+        mainWindow.hide();
+      } else {
+        mainWindow.show();
+        mainWindow.focus();
+      }
+    } else {
+      // Windows/Linux: Always show and focus
+      mainWindow.show();
+      mainWindow.focus();
+    }
   });
 
   // Handle right click - rebuild menu (to ensure fresh state)
@@ -100,6 +166,15 @@ function setupTrayEventHandlers(mainWindow: BrowserWindow): void {
     logger.info('Tray icon right-clicked - rebuilding menu');
     buildContextMenu(mainWindow);
   });
+
+  // macOS: Handle double-click for additional interaction
+  if (platform === 'darwin') {
+    tray.on('double-click', () => {
+      logger.info('Tray icon double-clicked - ensuring window visibility');
+      mainWindow.show();
+      mainWindow.focus();
+    });
+  }
 }
 
 /**
