@@ -1,6 +1,8 @@
 import fs from 'fs';
 import path from 'path';
-import { app } from 'electron';
+import os from 'os';
+import { execSync } from 'child_process';
+import { app, nativeImage } from 'electron';
 import type { InstalledApp } from './apps.service';
 
 // macOS application directories
@@ -13,25 +15,134 @@ const MACOS_APP_LOCATIONS = [
 ];
 
 /**
- * Extracts application icon as a base64 data URL.
- * @param exePath Path to the executable or application bundle
- * @returns Base64 data URL of the icon or undefined if extraction fails
+ * Extract icon from macOS application as data URL.
+ * @param appPath Path to the application
+ * @returns Data URL string or undefined if no icon found
  */
-async function getIconDataUrl(exePath: string): Promise<string | undefined> {
+async function getIconDataUrl(appPath: string): Promise<string | undefined> {
+  // 1. Input handling
+  if (!appPath) return undefined;
+
   try {
-    // Ensure app is ready before calling getFileIcon
-    if (!app.isReady()) {
-      await app.whenReady();
+    // 2. Core processing
+    // 2.1 Use native macOS sips command to extract icon from .app bundles
+    if (appPath.endsWith('.app')) {
+      try {
+        // Create a temporary file for the converted icon
+        const tempIconPath = path.join(os.tmpdir(), `app_icon_${Date.now()}.png`);
+
+        // Use sips to extract the icon from the app bundle
+        const sipsCommand = `sips -s format png "${appPath}/Contents/Resources/$(defaults read "${appPath}/Contents/Info" CFBundleIconFile 2>/dev/null || echo "AppIcon").icns" --out "${tempIconPath}" 2>/dev/null`;
+
+        try {
+          execSync(sipsCommand, { timeout: 5000 });
+
+          // Check if the icon file was created
+          if (fs.existsSync(tempIconPath)) {
+            // Read the PNG file and convert to data URL
+            const iconBuffer = fs.readFileSync(tempIconPath);
+            const icon = nativeImage.createFromBuffer(iconBuffer);
+
+            // Clean up temp file
+            try {
+              fs.unlinkSync(tempIconPath);
+            } catch (e) {
+              // Ignore cleanup errors
+            }
+
+            if (icon && !icon.isEmpty()) {
+              const resized = icon.resize({ width: 32, height: 32 });
+              return resized.toDataURL();
+            }
+          }
+        } catch (e) {
+          // Clean up temp file on error
+          try {
+            if (fs.existsSync(tempIconPath)) {
+              fs.unlinkSync(tempIconPath);
+            }
+          } catch (e) {
+            // Ignore cleanup errors
+          }
+        }
+      } catch (e) {
+        // Continue to fallback methods
+      }
+
+      // 2.2 Fallback: Try reading icon file directly
+      try {
+        const infoPlistPath = path.join(appPath, 'Contents', 'Info.plist');
+        if (fs.existsSync(infoPlistPath)) {
+          const plistContent = fs.readFileSync(infoPlistPath, 'utf8');
+
+          // Simple regex to find CFBundleIconFile
+          const iconMatch = plistContent.match(/<key>CFBundleIconFile<\/key>\s*<string>([^<]+)<\/string>/);
+          if (iconMatch) {
+            let iconFileName = iconMatch[1];
+
+            // Add .icns extension if not present
+            if (!iconFileName.endsWith('.icns')) {
+              iconFileName += '.icns';
+            }
+
+            // Try to find the icon in Resources directory
+            const iconPath = path.join(appPath, 'Contents', 'Resources', iconFileName);
+            if (fs.existsSync(iconPath)) {
+              // Read the .icns file directly
+              const iconBuffer = fs.readFileSync(iconPath);
+              const icon = nativeImage.createFromBuffer(iconBuffer);
+              if (icon && !icon.isEmpty()) {
+                const resized = icon.resize({ width: 32, height: 32 });
+                return resized.toDataURL();
+              }
+            }
+          }
+        }
+      } catch (e) {
+        // Continue to fallback
+      }
+
+      // 2.3 Fallback: try common icon names in Resources
+      const commonIconNames = ['AppIcon.icns', 'app.icns', 'icon.icns'];
+      const resourcesPath = path.join(appPath, 'Contents', 'Resources');
+
+      if (fs.existsSync(resourcesPath)) {
+        for (const iconName of commonIconNames) {
+          try {
+            const iconPath = path.join(resourcesPath, iconName);
+            if (fs.existsSync(iconPath)) {
+              // Read the .icns file directly
+              const iconBuffer = fs.readFileSync(iconPath);
+              const icon = nativeImage.createFromBuffer(iconBuffer);
+              if (icon && !icon.isEmpty()) {
+                const resized = icon.resize({ width: 32, height: 32 });
+                return resized.toDataURL();
+              }
+            }
+          } catch (e) {
+            // Continue trying other names
+          }
+        }
+      }
     }
-    const icon = await app.getFileIcon(exePath, { size: 'normal' });
-    if (icon && !icon.isEmpty()) {
-      // Downscale to 32x32 if very large to reduce IPC payload
-      const resized = icon.resize({ width: 32, height: 32 });
-      return resized.toDataURL();
+
+    // 2.4 Final fallback: for non-.app files, try Electron's getFileIcon
+    if (!appPath.endsWith('.app')) {
+      try {
+        const icon = await app.getFileIcon(appPath, { size: 'normal' });
+        if (icon && !icon.isEmpty()) {
+          const resized = icon.resize({ width: 32, height: 32 });
+          return resized.toDataURL();
+        }
+      } catch (e) {
+        // Final fallback failed
+      }
     }
   } catch (e) {
     // ignore icon failures
   }
+
+  // 3. Output handling - no icon found
   return undefined;
 }
 

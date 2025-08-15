@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { FiFolder } from 'react-icons/fi';
 import { GrAppsRounded } from 'react-icons/gr';
 
@@ -19,6 +19,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
   onBrowse,
 }) => {
   if (!isLaunch) return null;
+
   // 3. Output handling
   return (
     <>
@@ -31,6 +32,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
       >
         <GrAppsRounded className="h-3 w-3" />
       </button>
+
       <button
         type="button"
         onClick={() => onBrowse()}
