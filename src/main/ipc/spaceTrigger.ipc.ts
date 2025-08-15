@@ -1,5 +1,5 @@
 import { config } from '../../shared/config';
-import * as CommandAliasService from '../services/alias.service';
+import * as CommandAliasService from '../services/alias.service/alias.service';
 import { logger } from '../utils/logger';
 import * as shortcutService from '@/main/services/hotkey.service';
 

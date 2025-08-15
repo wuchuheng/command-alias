@@ -1,8 +1,8 @@
-import { dialog } from 'electron';
 import { config } from '../../shared/config';
 import { logger } from '../utils/logger';
-import { scanInstalledApps, clearAppsCache } from '../services/apps.service';
+import { scanInstalledApps, clearAppsCache, browseForExecutable } from '../services/app.service/apps.service';
 
+/** IPC handler for retrieving cached installed applications. */
 config.apps.getInstalledApps.handle(async () => {
   try {
     return await scanInstalledApps(false);
@@ -12,6 +12,7 @@ config.apps.getInstalledApps.handle(async () => {
   }
 });
 
+/** IPC handler for refreshing the installed applications cache. */
 config.apps.refreshInstalledApps.handle(async () => {
   try {
     clearAppsCache();
@@ -22,17 +23,10 @@ config.apps.refreshInstalledApps.handle(async () => {
   }
 });
 
+/** IPC handler for opening a file dialog to browse for executable files. */
 config.apps.browseForExecutable.handle(async () => {
   try {
-    const res = await dialog.showOpenDialog({
-      properties: ['openFile'],
-      filters: [
-        { name: 'Executables', extensions: ['exe', 'bat', 'cmd'] },
-        { name: 'All Files', extensions: ['*'] },
-      ],
-    });
-    if (res.canceled || res.filePaths.length === 0) return null;
-    return res.filePaths[0];
+    return await browseForExecutable();
   } catch (e) {
     logger.error('browseForExecutable failed', e);
     throw e;
