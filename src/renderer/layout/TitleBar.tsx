@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import packageJson from '../../../package.json';
 const Icons = {
   MoonIcon: (
@@ -90,6 +90,12 @@ const TitleBar: React.FC<TitleBarProps> = ({ isDarkTheme, onToggleTheme, onToggl
     window.electron.window.minimize();
   };
 
+  const [platform, setPlatform] = useState<string>('');
+
+  useEffect(() => {
+    window.electron.system.getPlatform().then(setPlatform);
+  }, []);
+
   const handleMaximize = () => {
     window.electron.window.maximize();
   };
@@ -99,18 +105,18 @@ const TitleBar: React.FC<TitleBarProps> = ({ isDarkTheme, onToggleTheme, onToggl
   };
 
   return (
-    <div className="titlebar flex items-center justify-between px-2 py-2 h-titlebar select-none drag  text-text-primary">
+    <div className="titlebar drag flex h-titlebar select-none items-center justify-between px-2 py-2 text-text-primary">
       {/* App Title - Left side */}
-      <div className="flex items-center space-x-3 no-drag">
-        <span className="text-sm font-medium opacity-80 ">{packageJson.productName}</span>
+      <div className="no-drag flex items-center space-x-3">
+        {/* <span className="text-sm font-medium opacity-80 ">{packageJson.productName}</span> */}
       </div>
 
       {/* Controls - Right side */}
-      <div className="flex items-center space-x-1 no-drag">
+      <div className="no-drag flex items-center space-x-1">
         {/* Language switcher */}
         <button
           onClick={onToggleLanguage}
-          className="titlebar-button p-2 rounded-md hover:bg-hover hover:text-text-primary transition-all duration-200"
+          className="titlebar-button rounded-md p-2 transition-all duration-200 hover:bg-hover hover:text-text-primary"
           aria-label="Switch Language"
         >
           {Icons.LanguageIcon}
@@ -122,36 +128,40 @@ const TitleBar: React.FC<TitleBarProps> = ({ isDarkTheme, onToggleTheme, onToggl
             e.stopPropagation();
             onToggleTheme();
           }}
-          className="titlebar-button p-2 rounded-md hover:bg-hover hover:text-text-primary transition-all duration-200"
+          className="titlebar-button rounded-md p-2 transition-all duration-200 hover:bg-hover hover:text-text-primary"
           aria-label="Toggle Theme"
         >
           <ThemeIcon isDark={isDarkTheme} />
         </button>
 
-        {/* Window controls */}
-        <button
-          onClick={handleMinimize}
-          className="titlebar-button p-2 rounded-md hover:bg-hover hover:text-text-primary transition-all duration-200"
-          aria-label="Minimize"
-        >
-          <span className="text-text-secondary">{Icons.MinIcon}</span>
-        </button>
+        {platform !== 'darwin' && (
+          <>
+            {/* Window controls */}
+            <button
+              onClick={handleMinimize}
+              className="titlebar-button rounded-md p-2 transition-all duration-200 hover:bg-hover hover:text-text-primary"
+              aria-label="Minimize"
+            >
+              <span className="text-text-secondary">{Icons.MinIcon}</span>
+            </button>
 
-        <button
-          onClick={handleMaximize}
-          className="itlebar-button p-2 rounded-md hover:bg-hover hover:text-text-primary transition-all duration-200"
-          aria-label="Maximize"
-        >
-          <span className="text-text-secondary">{Icons.MaxIcon}</span>
-        </button>
+            <button
+              onClick={handleMaximize}
+              className="itlebar-button rounded-md p-2 transition-all duration-200 hover:bg-hover hover:text-text-primary"
+              aria-label="Maximize"
+            >
+              <span className="text-text-secondary">{Icons.MaxIcon}</span>
+            </button>
 
-        <button
-          onClick={handleClose}
-          className="titlebar-button close p-2 rounded-md hover:bg-close-hover hover:text-close-hover-text transition-all duration-200"
-          aria-label="Close"
-        >
-          <span className="text-text-secondary hover:text-white">{Icons.CloseIcon}</span>
-        </button>
+            <button
+              onClick={handleClose}
+              className="titlebar-button close rounded-md p-2 transition-all duration-200 hover:bg-close-hover hover:text-close-hover-text"
+              aria-label="Close"
+            >
+              <span className="text-text-secondary hover:text-white">{Icons.CloseIcon}</span>
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

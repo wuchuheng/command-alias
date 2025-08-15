@@ -16,6 +16,7 @@ export const config: StrictConfig = {
   system: {
     bootloading: createSubscriptionChannel<BootloadingProgressing>('system/bootloading'),
     getBootloadProgressing: createIpcChannel<void, BootloadingProgressing>('system/getBootloadingProcessing'),
+    getPlatform: createIpcChannel<void, string>('system/getPlatform'),
   },
   welcome: {
     getWelcome: createIpcChannel<void, Welcome>('welcome/getWelcome'),

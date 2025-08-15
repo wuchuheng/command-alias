@@ -31,6 +31,7 @@ declare global {
       system: {
         bootloading: (callback: (data: BootloadingProgressing) => void) => () => void;
         getBootloadProgressing: () => Promise<BootloadingProgressing>;
+        getPlatform: () => Promise<string>;
       };
 
       welcome: {

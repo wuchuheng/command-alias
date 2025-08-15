@@ -47,6 +47,8 @@ async function generateMainLogo(svgPath: string, projectRoot: string): Promise<v
   console.log(`    ✓ Generated: logo.png`);
 }
 
+type TrayIcon = { name: string; size: number; desc: string };
+
 /**
  * Generate platform-specific tray icons optimized for system tray usage.
  * Only generates the 4 files actually used by the tray service.
@@ -62,32 +64,30 @@ async function generateTrayIcons(svgPath: string, projectRoot: string): Promise<
   console.log('  🖥️  Generating tray icons...');
 
   // 2. Core processing - Generate only the 4 files used by tray service
-  const icons = [
-    { name: 'tray-icon-darwin-16x16.png', size: 16, grayscale: true, desc: 'macOS (template)' },
-    { name: 'tray-icon-win32-16x16.png', size: 16, grayscale: false, desc: 'Windows' },
-    { name: 'tray-icon-linux-22x22.png', size: 22, grayscale: false, desc: 'Linux' },
-    { name: 'tray-icon-22x22.png', size: 22, grayscale: false, desc: 'Universal fallback' },
+  const icons: TrayIcon[] = [
+    { name: 'tray-icon-darwin-22x22.png', size: 22, desc: 'macOS' },
+    { name: 'tray-icon-win32-16x16.png', size: 16, desc: 'Windows' },
+    { name: 'tray-icon-linux-22x22.png', size: 22, desc: 'Linux' },
+    { name: 'tray-icon-22x22.png', size: 22, desc: 'Universal fallback' },
   ];
 
   for (const icon of icons) {
     const outputPath = path.join(trayOutputDir, icon.name);
 
-    let processor = sharp(svgPath).resize(icon.size, icon.size, {
-      fit: 'contain',
-      background: { r: 0, g: 0, b: 0, alpha: 0 },
-    });
-
-    if (icon.grayscale) {
-      processor = processor.greyscale(); // macOS template optimization
-    }
-
-    await processor.png({ compressionLevel: 9 }).toFile(outputPath);
+    // Generate normal PNG icon for all platforms
+    await sharp(svgPath)
+      .resize(icon.size, icon.size, {
+        fit: 'contain',
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
+      })
+      .png({ compressionLevel: 9 })
+      .toFile(outputPath);
 
     console.log(`      ✓ ${icon.name} (${icon.size}x${icon.size}) - ${icon.desc}`);
   }
 
   // 3. Output handling - Clean up any old complex directory structure
-  await cleanupUnusedTrayFiles(trayOutputDir);
+  await cleanupUnusedTrayFiles(trayOutputDir, icons);
 
   console.log(`    ✓ Tray icons saved to: ${trayOutputDir}`);
 }
@@ -95,7 +95,7 @@ async function generateTrayIcons(svgPath: string, projectRoot: string): Promise<
 /**
  * Clean up unused tray icon files and directories from previous generations.
  */
-async function cleanupUnusedTrayFiles(trayOutputDir: string): Promise<void> {
+async function cleanupUnusedTrayFiles(trayOutputDir: string, icons: TrayIcon[]): Promise<void> {
   // 1. Input handling
   const platformDirs = ['darwin', 'win32', 'linux'];
 
@@ -108,12 +108,7 @@ async function cleanupUnusedTrayFiles(trayOutputDir: string): Promise<void> {
   }
 
   // 2.1 Remove any other extra files (keep only the 4 we need)
-  const keepFiles = [
-    'tray-icon-darwin-16x16.png',
-    'tray-icon-win32-16x16.png',
-    'tray-icon-linux-22x22.png',
-    'tray-icon-22x22.png',
-  ];
+  const keepFiles = icons.map(icon => icon.name);
 
   const existingFiles = fs.readdirSync(trayOutputDir);
   for (const file of existingFiles) {

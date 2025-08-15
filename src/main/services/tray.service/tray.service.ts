@@ -60,55 +60,55 @@ function createTrayIcon(): Electron.NativeImage | null {
   const platform = process.platform;
   let iconPath: string;
 
+  const trayIconNames = {
+    darwin: 'assets/genLogo/tray/tray-icon-darwin-22x22.png',
+    win32: 'assets/genLogo/tray/tray-icon-win32-16x16.png',
+    linux: 'assets/genLogo/tray/tray-icon-linux-22x22.png',
+    universal: 'assets/genLogo/tray/tray-icon-22x22.png',
+  };
+
   if (app.isPackaged) {
     // 1.1 Production: Use platform-specific tray icons with size indicators
     switch (platform) {
       case 'darwin':
-        iconPath = path.join(process.resourcesPath, 'assets/genLogo/tray/tray-icon-darwin-16x16.png');
+        iconPath = path.join(process.resourcesPath, trayIconNames.darwin);
         break;
       case 'win32':
-        iconPath = path.join(process.resourcesPath, 'assets/genLogo/tray/tray-icon-win32-16x16.png');
+        iconPath = path.join(process.resourcesPath, trayIconNames.win32);
+        break;
+      case 'linux':
+        iconPath = path.join(process.resourcesPath, trayIconNames.linux);
         break;
       default: // linux and others
-        iconPath = path.join(process.resourcesPath, 'assets/genLogo/tray/tray-icon-linux-22x22.png');
-        break;
+        logger.warn(`Unsupported platform: ${platform}`);
+        iconPath = path.join(process.resourcesPath, trayIconNames.universal);
     }
   } else {
     // 1.2 Development: Use platform-specific tray icons with size indicators
     switch (platform) {
       case 'darwin':
-        iconPath = path.join(__dirname, '../../src/renderer/assets/genLogo/tray/tray-icon-darwin-16x16.png');
+        iconPath = path.join(__dirname, `../../src/renderer/${trayIconNames.darwin}`);
         break;
       case 'win32':
-        iconPath = path.join(__dirname, '../../src/renderer/assets/genLogo/tray/tray-icon-win32-16x16.png');
+        iconPath = path.join(__dirname, `../../src/renderer/${trayIconNames.win32}`);
         break;
-      default: // linux and others
-        iconPath = path.join(__dirname, '../../src/renderer/assets/genLogo/tray/tray-icon-linux-22x22.png');
+      case 'linux':
+        iconPath = path.join(__dirname, `../../src/renderer/${trayIconNames.linux}`);
         break;
+      default:
+        logger.warn(`Unsupported platform: ${platform}`);
+        iconPath = path.join(__dirname, `../../src/renderer/${trayIconNames.universal}`);
     }
   }
-
-  logger.info(`Tray icon path (${platform}): ${iconPath}`);
 
   // 1.3 Check if tray icon exists, with intelligent fallback strategy
   if (!fs.existsSync(iconPath)) {
-    logger.warn(`Platform-specific tray icon not found: ${iconPath}`);
-
-    // Fallback to universal tray icon with size indicator
-    const universalPath = app.isPackaged
-      ? path.join(process.resourcesPath, 'assets/genLogo/tray/tray-icon-22x22.png')
-      : path.join(__dirname, '../../src/renderer/assets/genLogo/tray/tray-icon-22x22.png');
-    if (fs.existsSync(universalPath)) {
-      logger.info(`Using universal tray icon: ${universalPath}`);
-      iconPath = universalPath;
-    } else {
-      logger.error(`No suitable tray icon found. Checked: ${iconPath}, ${universalPath}`);
-      logger.error('Please run "npm run gen:tray-icons" to generate tray icons');
-      return null;
-    }
+    logger.warn(`Tray icon not found: ${iconPath}`);
+    throw new Error(`Tray icon not found: ${iconPath}`);
   }
 
   // 2. Core processing - Create icon with platform-specific configuration
+  logger.info(`Tray icon path (${platform}): ${iconPath}`);
   try {
     const icon = nativeImage.createFromPath(iconPath);
     const iconSize = icon.getSize();
@@ -120,10 +120,10 @@ function createTrayIcon(): Electron.NativeImage | null {
       return null;
     }
 
-    // 2.1 Configure macOS template image for proper dark/light mode adaptation
+    // 2.1 For macOS, use regular icon without template mode for now
+    // Template mode can cause black squares if the icon isn't designed for it
     if (platform === 'darwin') {
-      icon.setTemplateImage(true);
-      logger.info('Set template image for macOS tray icon');
+      logger.info('Using regular macOS tray icon (16x16) without template mode');
     }
 
     return icon;
