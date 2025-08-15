@@ -1,10 +1,7 @@
 import { useEffect, useState } from 'react';
-import logoSvg from '../../assets/logo.svg';
 import type { CommandAlias } from '../../../main/database/entities/CommandAlias';
 import { AddBindingModal } from '../../components/AddBindingModal/AddBindingModal';
-import { productName } from '../../../../package.json';
-import { IoMdAdd } from 'react-icons/io';
-import { TypeFilterSelect, type BindingTypeFilter } from '../../components/TypeFilterSelect';
+import { type BindingTypeFilter } from '../../components/TypeFilterSelect';
 import { TableRender } from './TableRender';
 import { ToolBarRender } from './ToolBarRender';
 
