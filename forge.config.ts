@@ -27,6 +27,15 @@ const config: ForgeConfig = {
   makers: [
     new MakerSquirrel({ setupIcon: path.join(iconDir, 'icon.ico') }),
     new MakerZIP({}, ['darwin']),
+
+    {
+      // Path to the icon to use for the app in the DMG window
+      name: '@electron-forge/maker-dmg',
+      config: {
+        icon: path.join(iconDir, 'icon.icns'),
+      },
+    },
+
     new MakerRpm({ options: { icon: path.join(iconDir, 'icon.png') } }),
     new MakerDeb({ options: { icon: path.join(iconDir, 'icon.png') } }),
   ],
