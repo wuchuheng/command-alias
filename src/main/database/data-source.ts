@@ -4,6 +4,8 @@ import { logger } from '../utils/logger';
 import { Welcome } from './entities/welcom';
 import { CommandAlias } from './entities/CommandAlias';
 import { seedDatabase } from './seed';
+import { app } from 'electron';
+import path from 'path';
 const databaseName = `${packageJson.name}-${packageJson.version}.sqlite`;
 
 let db: DataSource;
@@ -16,10 +18,11 @@ export const initDB = async (): Promise<void> => {
 
   try {
     logger.info('Initializing database connection');
+    const databasePath = path.join(app.getPath('userData'), databaseName);
 
     db = new DataSource({
       type: 'better-sqlite3',
-      database: isDev ? 'dev.sqlite' : databaseName,
+      database: databasePath,
       entities: [Welcome, CommandAlias],
       subscribers: [],
       synchronize: true,

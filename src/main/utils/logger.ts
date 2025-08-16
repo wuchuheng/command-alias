@@ -11,9 +11,11 @@ type Log = {
 };
 
 const getLogDir = () => {
-  const appAppPath = app.isPackaged ? './' : app.getAppPath();
+  // 1. Input handling
+  // Get the user data directory for the Electron app.
+  const appAppPath = app.getPath('logs');
 
-  const logDir = path.join(appAppPath, 'logs', dayjs().format('YYYY-MM-DD'));
+  const logDir = path.join(appAppPath, dayjs().format('YYYY-MM-DD'));
 
   if (!fs.existsSync(logDir)) {
     fs.mkdirSync(logDir, { recursive: true });
