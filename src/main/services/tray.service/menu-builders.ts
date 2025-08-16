@@ -77,8 +77,12 @@ export function createSettingsSubmenu(
     },
     { type: 'separator' },
     {
-      label: '📁 App Data',
+      label: '📁 Open App Data',
       click: () => handleOpenDataFolder(),
+    },
+    {
+      label: '📁 Open App Logs',
+      click: () => handleOpenLogsFolder(),
     },
   ];
 }
