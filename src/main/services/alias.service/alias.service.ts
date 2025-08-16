@@ -1,5 +1,6 @@
 import { logger } from '../../utils/logger';
 import { CommandAlias } from '../../database/entities/CommandAlias';
+import { Like } from 'typeorm';
 import { getDataSource } from '../../database/data-source';
 import { aliasSubscription } from '../../ipc/subscription';
 import { launchWindowsApp } from './windowsLaunch';
@@ -85,4 +86,78 @@ export const triggerAction = async (id: number): Promise<void> => {
   }
 
   // 3. Output handling - No specific output
+};
+
+/**
+ * Remove a key binding from the database.
+ * @param id The ID of the key binding to remove
+ */
+export const remove = async (id: number): Promise<void> => {
+  const keyBindingRepository = getDataSource().getRepository(CommandAlias);
+  try {
+    // 1. Input handling - Validate ID
+    if (typeof id !== 'number' || id <= 0) {
+      throw new Error('Invalid alias ID');
+    }
+
+    // 2. Core processing - Remove binding from database
+    await keyBindingRepository.delete({ id });
+
+    // 3. Output handling - Broadcast updated list to subscribers
+    const updatedAliases = await getAlias();
+    aliasSubscription.broadcast(updatedAliases);
+  } catch (error) {
+    logger.error('Failed to remove key binding', error);
+    throw error;
+  }
+};
+
+/**
+ * Update an existing key binding in the database.
+ * @param newValue The updated key binding data
+ */
+export const update = async (newValue: CommandAlias) => {
+  const keyBindingRepository = getDataSource().getRepository(CommandAlias);
+  try {
+    // 1. Input handling - Validate new value
+    if (!newValue || !newValue.id) {
+      throw new Error('Invalid binding');
+    }
+
+    // 2. Core processing - Update binding in database
+    await keyBindingRepository.update({ id: newValue.id }, newValue);
+
+    // 3. Output handling - Broadcast updated list to subscribers
+    const updatedAliases = await getAlias();
+    aliasSubscription.broadcast(updatedAliases);
+  } catch (error) {
+    logger.error('Failed to update key binding', error);
+    throw error;
+  }
+};
+
+/**
+ *
+ * @param name
+ */
+/**
+ * Checks if an alias exists that starts with the given name.
+ * @param name Alias prefix to check
+ * @returns The matching alias string, or null if not found
+ */
+export const checkAlias = async (name: string): Promise<string | null> => {
+  const caRepository = getDataSource().getRepository(CommandAlias);
+  // 1. Input handling: validate name
+  if (!name || typeof name !== 'string') {
+    throw new Error('Alias name must be a non-empty string');
+  }
+
+  // 2. Core processing: query for alias starting with name (case-insensitive)
+  const found = await caRepository.findOne({
+    where: { alias: Like(`${name}%`) },
+    select: ['alias'],
+  });
+
+  // 3. Output handling: return alias or null
+  return found?.alias ?? null;
 };

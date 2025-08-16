@@ -8,7 +8,7 @@ import { AppSearchPanel } from './components/AppSearchPanel';
 export interface TargetPickerProps {
   actionType: ActionType;
   value: string;
-  onChange: (val: string) => void;
+  onChange: (val: string, appName?: string) => void;
   isModalOpen: boolean;
   className?: string;
 }
@@ -96,7 +96,7 @@ export const TargetPicker: React.FC<TargetPickerProps> = ({
         error={error}
         apps={filtered}
         onPick={app => {
-          onChange(app.path);
+          onChange(app.path, app.name);
           closePanel();
         }}
         onRefresh={() => loadApps(true)}

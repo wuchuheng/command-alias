@@ -30,6 +30,9 @@ export const config: StrictConfig = {
     subscribeToAlias: createSubscriptionChannel<CommandAlias[]>('CommandAlias/subscribeToKeyBindings'),
     setAutoLaunch: createIpcChannel<boolean, void>('CommandAlias/setAutoLaunch'),
     getAutoLaunchStatus: createIpcChannel<void, boolean>('CommandAlias/getAutoLaunchStatus'),
+    remove: createIpcChannel<number, void>('CommandAlias/removeBinding'),
+    update: createIpcChannel<CommandAlias, void>('CommandAlias/updateBinding'),
+    checkAlias: createIpcChannel<string, string | null>('CommandAlias/checkAlias'),
   },
 
   apps: {

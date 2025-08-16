@@ -46,6 +46,11 @@ declare global {
         subscribeToAlias: (callback: (bindings: CommandAlias[]) => void) => () => void;
         setAutoLaunch: (enable: boolean) => Promise<void>;
         getAutoLaunchStatus: () => Promise<boolean>;
+
+        remove: (id: number) => Promise<void>;
+        update: (binding: CommandAlias) => Promise<void>;
+
+        checkAlias: (alias: string) => Promise<string | null>;
       };
 
       apps: {

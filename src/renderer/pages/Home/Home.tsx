@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { CommandAlias } from '../../../main/database/entities/CommandAlias';
-import { AddBindingModal } from '../../components/AddBindingModal/AddBindingModal';
+import { BindingModal } from '../../components/AddBindingModal/BindingModal';
 import { type BindingTypeFilter } from '../../components/TypeFilterSelect';
 import { TableRender } from './TableRender';
 import { ToolBarRender } from './ToolBarRender';
@@ -47,10 +47,41 @@ export const Home = () => {
       return hay.includes(q);
     });
   })();
+  const onDelete = (id: number) => {
+    window.electron.commandAlias.remove(id);
+    loadBindings();
+  };
+
+  const [editValue, setEditValue] = useState<CommandAlias | null>(null);
+  const handleEditBinding = async (binding: CommandAlias) => {
+    if (!editValue) return;
+    try {
+      await window.electron.commandAlias.update(binding);
+      await loadBindings();
+    } catch (error) {
+      console.error('Failed to update binding', error);
+      throw error;
+    }
+  };
 
   return (
     <>
-      <AddBindingModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onAdd={handleAddBinding} />
+      <BindingModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleAddBinding}
+        title="Add command alias"
+      />
+      {editValue !== null && (
+        <BindingModal
+          title="Edit command alias"
+          value={editValue}
+          isOpen={editValue !== null}
+          onClose={() => setEditValue(null)}
+          onSubmit={value => handleEditBinding({ ...value, id: editValue.id })}
+          confirmText="Edit"
+        />
+      )}
 
       <div className="mx-auto max-w-4xl p-4">
         {/* Top toolbar: macOS-style header with controls on the right */}
@@ -62,8 +93,10 @@ export const Home = () => {
           setIsModalOpen={setIsModalOpen}
         />
 
-        <TableRender filteredBindings={filteredBindings} />
+        <TableRender filteredBindings={filteredBindings} onDelete={onDelete} onEdit={setEditValue} />
       </div>
     </>
   );
 };
+
+encodeURIComponent('hello');

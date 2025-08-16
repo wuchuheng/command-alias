@@ -29,6 +29,8 @@
     "editor.defaultFormatter": "vscode.html-language-features"
   },
   "cSpell.words": [
-    "keycap"
+    "keycap",
+    "Popconfirm",
+    "wuchuheng"
   ],
 }

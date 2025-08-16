@@ -1,5 +1,5 @@
 import { config } from '../../shared/config';
-import * as CommandAliasService from '../services/alias.service/alias.service';
+import * as ca from '../services/alias.service/alias.service';
 import { logger } from '../utils/logger';
 import * as shortcutService from '@/main/services/hotkey.service';
 
@@ -8,7 +8,7 @@ config.commandAlias.getAlias.handle(async () => {
     // 1. Input handling - No parameters to validate
 
     // 2. Core processing - Get bindings from service
-    const bindings = await CommandAliasService.getAlias();
+    const bindings = await ca.getAlias();
 
     // 3. Output handling
     return bindings;
@@ -26,7 +26,7 @@ config.commandAlias.addAlias.handle(async binding => {
     }
 
     // 2. Core processing - Add binding through service
-    await CommandAliasService.addAlias(binding);
+    await ca.addAlias(binding);
 
     // 3. Output handling - No specific output
   } catch (error) {
@@ -43,7 +43,7 @@ config.commandAlias.toggleApp.handle(async id => {
     }
 
     // 2. Core processing - Trigger action through service
-    await CommandAliasService.triggerAction(id);
+    await ca.triggerAction(id);
 
     // 3. Output handling - No specific output
   } catch (error) {
@@ -53,3 +53,7 @@ config.commandAlias.toggleApp.handle(async id => {
 });
 
 config.commandAlias.hideCommandPalette.handle(shortcutService.hideCommandPalette);
+
+config.commandAlias.remove.handle(ca.remove);
+config.commandAlias.update.handle(ca.update);
+config.commandAlias.checkAlias.handle(ca.checkAlias);
