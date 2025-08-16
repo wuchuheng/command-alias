@@ -58,7 +58,6 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@headlessui/react": "^2.2.7",
     "@types/auto-launch": "^5.0.5",
     "antd": "^5.27.0",
     "auto-launch": "^5.0.6",
