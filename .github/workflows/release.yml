@@ -129,19 +129,26 @@ jobs:
           name: ${{ github.ref_name }}
           body: Automated release for ${{ github.ref_name }}
           files: |
-            ./**/*.exe
-            ./**/*.deb
-            ./**/*.rpm
-            ./*.dmg
+            **/*.exe
+            deb/x64/*.deb
+            rpm/x64/*.rpm
+            *.dmg
 
-  cleanup:
-    name: Cleanup cache files
+  delete-artifacts:
+    name: Delete workflow artifacts
     runs-on: ubuntu-latest
+    if: always()
     needs: [release]
     steps:
-      - name: Remove cache and build files
-        run: |
-          rm -rf node_modules
-          rm -rf out
-          rm -rf .cache
-          rm -rf dist
+      - name: Delete Windows artifact
+        uses: actions/delete-artifact@v3
+        with:
+          name: wind32
+      - name: Delete Linux artifact
+        uses: actions/delete-artifact@v3
+        with:
+          name: linux
+      - name: Delete macOS artifact
+        uses: actions/delete-artifact@v3
+        with:
+          name: macOS
