@@ -103,6 +103,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 3
     needs: [macOS, wind32, linux]
+    permissions:
+      contents: write
 
     steps:
       - name: Download Windows Artifact
@@ -120,6 +122,9 @@ jobs:
         with:
           name: macOS
 
+      - name: List files (debug)
+        run: ls -R
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
@@ -127,9 +132,9 @@ jobs:
           name: ${{ github.ref_name }}
           body: Automated release for ${{ github.ref_name }}
           files: |
-            out/make/*.dmg
-            out/make/*.deb
-            out/make/*.rpm
-            out/make/*.AppImage
+            wind32/out/make/**/*.exe
+            linux/out/make/**/*.deb
+            linux/out/make/**/*.rpm
+            macOS/out/make/*.dmg
 
   # Remove all cache files wether the jobs complected or not
