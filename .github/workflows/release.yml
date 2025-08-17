@@ -39,8 +39,8 @@ jobs:
         with:
           name: Command-alias
           path: |
-            out/make/*.zip
-            out/make/*.exe
+            out/make/**/*.zip
+            out/make/**/*.exe
 
       # - name: Create Release
       #   if: matrix.platform == 'ubuntu-latest'
