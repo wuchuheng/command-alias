@@ -75,9 +75,8 @@ jobs:
             out/make/**/*.zip
             out/make/**/*.deb
             out/make/**/*.rpm
-          #  out/make/**/*.AppImage
   macOS:
-    name: Build Linux maker file.
+    name: Build macOS maker file.
     runs-on: macos-latest
     timeout-minutes: 5
 
