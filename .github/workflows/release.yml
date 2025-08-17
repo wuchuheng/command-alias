@@ -13,9 +13,6 @@ jobs:
     name: Build windows maker file.
     runs-on: windows-latest
     timeout-minutes: 5
-    # strategy:
-    #   matrix:
-    #     platform: [macos-latest, ubuntu-latest]
 
     steps:
       - name: Checkout code
@@ -37,14 +34,13 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Command-alias
+          name: wind32
           path: |
             out/make/**/*.exe
   linux:
     name: Build Linux maker file.
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    #     platform: [macos-latest]
 
     steps:
       - name: Install OS dependencies
@@ -69,7 +65,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Command-alias
+          name: linux
           path: |
             out/make/**/*.deb
             out/make/**/*.rpm
@@ -98,7 +94,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Command-alias
+          name: macOS
           path: |
             out/make/*.dmg
 
@@ -109,6 +105,21 @@ jobs:
     needs: [macOS, wind32, linux]
 
     steps:
+      - name: Download Windows Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: wind32
+
+      - name: Download Linux Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: linux
+
+      - name: Download macOS Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: macOS
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
