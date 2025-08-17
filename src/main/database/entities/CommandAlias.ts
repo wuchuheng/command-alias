@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-@Entity()
+@Entity('command_aliases')
 export class CommandAlias {
   @PrimaryGeneratedColumn()
   id: number;
