@@ -11,7 +11,7 @@ on:
 jobs:
   wind32:
     name: Build windows maker file.
-    run-on: windows-latest
+    runs-on: windows-latest
     timeout-minutes: 5
     # strategy:
     #   matrix:
@@ -43,7 +43,7 @@ jobs:
       #      out/make/**/*.zip
   linux:
     name: Build Linux maker file.
-    run-on: ubuntu-latest
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     #     platform: [macos-latest]
 
@@ -78,7 +78,7 @@ jobs:
             out/make/**/*.AppImage
   macOS:
     name: Build Linux maker file.
-    run-on: macos-latest
+    runs-on: macos-latest
     timeout-minutes: 5
 
     steps:
@@ -108,7 +108,7 @@ jobs:
 
   release:
     name: 'Create Release'
-    run-on: ubuntu-latest
+    runs-on: ubuntu-latest
     timeout-minutes: 3
     needs: [macOS, wind32, linux]
 
@@ -124,3 +124,5 @@ jobs:
             out/make/*.deb
             out/make/*.rpm
             out/make/*.AppImage
+
+  # Remove all cache files wether the jobs complected or not
