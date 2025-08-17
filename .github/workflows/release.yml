@@ -75,7 +75,7 @@ jobs:
             out/make/**/*.zip
             out/make/**/*.deb
             out/make/**/*.rpm
-            out/make/**/*.AppImage
+          #  out/make/**/*.AppImage
   macOS:
     name: Build Linux maker file.
     runs-on: macos-latest
