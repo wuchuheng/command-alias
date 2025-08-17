@@ -1,0 +1,59 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+    branches:
+      - dev
+      - main
+
+jobs:
+  wind32:
+    name: Build and Release
+    runs-on: windows-latest
+    # strategy:
+    #   matrix:
+    #     platform: [windows-latest, macos-latest, ubuntu-latest]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.14
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build for windows
+        run: npm run make
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # - name: Upload artifacts
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: spaceboot-${{ matrix.platform }}
+      #     path: |
+      #       out/make/*.zip
+      #       out/make/*.dmg
+      #       out/make/*.deb
+      #       out/make/*.rpm
+      #       out/make/*.AppImage
+
+      # - name: Create Release
+      #   if: matrix.platform == 'ubuntu-latest'
+      #   uses: softprops/action-gh-release@v1
+      #   with:
+      #     tag_name: ${{ github.ref }}
+      #     name: ${{ github.ref_name }}
+      #     body: Automated release for ${{ github.ref_name }}
+      #     files: |
+      #       out/make/*.zip
+      #       out/make/*.dmg
+      #       out/make/*.deb
+      #       out/make/*.rpm
+      #       out/make/*.AppImage
