@@ -139,16 +139,18 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
     needs: [release]
+    permissions:
+      contents: write
     steps:
       - name: Delete Windows artifact
-        uses: actions/delete-artifact@v3
+        uses: geekyeggo/delete-artifact@v5
         with:
           name: wind32
       - name: Delete Linux artifact
-        uses: actions/delete-artifact@v3
+        uses: geekyeggo/delete-artifact@v5
         with:
           name: linux
       - name: Delete macOS artifact
-        uses: actions/delete-artifact@v3
+        uses: geekyeggo/delete-artifact@v5
         with:
           name: macOS
