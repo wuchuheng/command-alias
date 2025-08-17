@@ -1,6 +1,6 @@
 {
   "name": "command-alias",
-  "productName": "Command Alias",
+  "productName": "Command-Alias",
   "version": "1.0.0",
   "description": "My Electron application description",
   "main": ".webpack/main",

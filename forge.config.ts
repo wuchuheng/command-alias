@@ -13,6 +13,7 @@ import { FuseV1Options, FuseVersion } from '@electron/fuses';
 import { mainConfig } from './webpack.main.config';
 import { rendererConfig } from './webpack.renderer.config';
 import path from 'path';
+import { name } from './package.json';
 
 const iconDir = path.join(__dirname, 'src/renderer/assets/genLogo');
 
@@ -23,6 +24,7 @@ const config: ForgeConfig = {
     icon: path.join(iconDir, 'icon'),
     asar: true,
     extraResource: ['./src/renderer/assets/'],
+    executableName: name,
   },
   rebuildConfig: {},
   makers: [

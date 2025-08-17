@@ -12,11 +12,11 @@ jobs:
   wind32:
     name: Build windows maker file.
     runs-on: windows-latest
-    timeout-minutes: 5 
+    timeout-minutes: 5
     # strategy:
     #   matrix:
     #     platform: [macos-latest, ubuntu-latest]
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -41,6 +41,43 @@ jobs:
           path: |
             out/make/**/*.zip
             out/make/**/*.exe
+  ubuntu:
+    name: Build Linux maker file.
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # strategy:
+    #   matrix:
+    #     platform: [macos-latest]
+
+    steps:
+      - name: Install OS dependencies
+        run: sudo apt install dpkg fakeroot rpm
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.14
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build for windows
+        run: npm run make
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Command-alias
+          path: |
+            out/make/**/*.zip
+            out/make/**/*.deb
+            out/make/**/*.rpm
+            out/make/**/*.AppImage
 
       # - name: Create Release
       #   if: matrix.platform == 'ubuntu-latest'
@@ -56,7 +93,4 @@ jobs:
       #       out/make/*.rpm
       #       out/make/*.AppImage
 
-            # out/make/*.dmg
-            # out/make/*.deb
-            # out/make/*.rpm
-            # out/make/*.AppImage
+      # out/make/*.dmg
