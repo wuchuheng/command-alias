@@ -45,11 +45,3 @@ app.on('will-quit', () => globalHotKey.unregisterCtrlSpaceHandler());
 app.on('activate', () => {
   logger.info('Application activated');
 });
-
-if (platform() === 'darwin') {
-  const icon = app.isPackaged
-    ? process.resourcesPath + 'assets/genLogo/icon.png'
-    : 'src/renderer/assets/genLogo/icon.png';
-  const image = nativeImage.createFromPath(icon);
-  app.dock.setIcon(image);
-}

@@ -21,7 +21,6 @@ const config: ForgeConfig = {
   packagerConfig: {
     icon: path.join(iconDir, 'icon'),
     asar: true,
-    all: true,
     extraResource: ['./src/renderer/assets/'],
   },
   rebuildConfig: {},
