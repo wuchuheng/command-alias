@@ -29,7 +29,6 @@ const config: ForgeConfig = {
     new MakerZIP({}, ['darwin']),
 
     {
-      // Path to the icon to use for the app in the DMG window
       name: '@electron-forge/maker-dmg',
       config: {
         icon: path.join(iconDir, 'icon.icns'),
