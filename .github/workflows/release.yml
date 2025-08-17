@@ -11,7 +11,7 @@ on:
 jobs:
   wind32:
     name: Build windows maker file.
-    runs-on: windows-latest
+    run-on: windows-latest
     timeout-minutes: 5
     # strategy:
     #   matrix:
@@ -39,14 +39,12 @@ jobs:
         with:
           name: Command-alias
           path: |
-            out/make/**/*.zip
             out/make/**/*.exe
-  ubuntu:
+      #      out/make/**/*.zip
+  linux:
     name: Build Linux maker file.
-    runs-on: ubuntu-latest
+    run-on: ubuntu-latest
     timeout-minutes: 5
-    # strategy:
-    #   matrix:
     #     platform: [macos-latest]
 
     steps:
@@ -78,19 +76,51 @@ jobs:
             out/make/**/*.deb
             out/make/**/*.rpm
             out/make/**/*.AppImage
+  macOS:
+    name: Build Linux maker file.
+    run-on: macos-latest
+    timeout-minutes: 5
 
-      # - name: Create Release
-      #   if: matrix.platform == 'ubuntu-latest'
-      #   uses: softprops/action-gh-release@v1
-      #   with:
-      #     tag_name: ${{ github.ref }}
-      #     name: ${{ github.ref_name }}
-      #     body: Automated release for ${{ github.ref_name }}
-      #     files: |
-      #       out/make/*.zip
-      #       out/make/*.dmg
-      #       out/make/*.deb
-      #       out/make/*.rpm
-      #       out/make/*.AppImage
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      # out/make/*.dmg
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.14
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build for windows
+        run: npm run make
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Command-alias
+          path: |
+            out/make/*.dmg
+            out/make/**/*.zip
+
+  release:
+    name: 'Create Release'
+    run-on: ubuntu-latest
+    timeout-minutes: 3
+    needs: [macOS, wind32, linux]
+
+    steps:
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref }}
+          name: ${{ github.ref_name }}
+          body: Automated release for ${{ github.ref_name }}
+          files: |
+            out/make/*.dmg
+            out/make/*.deb
+            out/make/*.rpm
+            out/make/*.AppImage
