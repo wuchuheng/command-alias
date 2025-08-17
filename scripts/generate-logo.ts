@@ -10,7 +10,7 @@ import sharp from 'sharp';
 async function main(): Promise<void> {
   // 1. Input handling
   const projectRoot = path.resolve(__dirname, '..');
-  const svgPath = path.join(projectRoot, 'src', 'renderer', 'assets', 'logo.svg');
+  const svgPath = path.join(projectRoot, 'src/renderer/assets/logo.svg');
 
   if (!fs.existsSync(svgPath)) {
     throw new Error(`Missing SVG at ${svgPath}`);
@@ -55,7 +55,7 @@ type TrayIcon = { name: string; size: number; desc: string };
  */
 async function generateTrayIcons(svgPath: string, projectRoot: string): Promise<void> {
   // 1. Input handling
-  const trayOutputDir = path.join(projectRoot, 'src', 'renderer', 'assets', 'genLogo', 'tray');
+  const trayOutputDir = path.join(projectRoot, 'src/renderer/assets/genLogo/tray');
 
   if (!fs.existsSync(trayOutputDir)) {
     fs.mkdirSync(trayOutputDir, { recursive: true });
@@ -65,18 +65,27 @@ async function generateTrayIcons(svgPath: string, projectRoot: string): Promise<
 
   // 2. Core processing - Generate only the 4 files used by tray service
   const icons: TrayIcon[] = [
-    { name: 'tray-icon-darwin-22x22.png', size: 22, desc: 'macOS' },
-    { name: 'tray-icon-win32-16x16.png', size: 16, desc: 'Windows' },
-    { name: 'tray-icon-linux-22x22.png', size: 22, desc: 'Linux' },
-    { name: 'tray-icon-22x22.png', size: 22, desc: 'Universal fallback' },
+    { name: 'tray.png', size: 16, desc: 'tray.png' },
+    { name: 'tray@1x.png', size: 16, desc: 'tray@1x.png' },
+    { name: 'tray@1.25x.png', size: 16 * 1.25, desc: 'tray@1.25x.png' },
+    { name: 'tray@1.33x.png', size: 16 * 1.33, desc: 'tray@1.33x.png' },
+    { name: 'tray@1.4x.png', size: 16 * 1.4, desc: 'tray@1.4x.png' },
+    { name: 'tray@1.5x.png', size: 16 * 1.5, desc: 'tray@1.5x.png' },
+    { name: 'tray@1.8x.png', size: 16 * 1.8, desc: 'tray@1.8x.png' },
+    { name: 'tray@2x.png', size: 16 * 2, desc: 'tray@2x.png' },
+    { name: 'tray@2.5x.png', size: 16 * 2.5, desc: 'tray@2.5x.png' },
+    { name: 'tray@3x.png', size: 16 * 3, desc: 'tray@3x.png' },
+    { name: 'tray@4x.png', size: 16 * 4, desc: 'tray@4x.png' },
+    { name: 'tray@5x.png', size: 16 * 5, desc: 'tray@5x.png' },
   ];
 
   for (const icon of icons) {
     const outputPath = path.join(trayOutputDir, icon.name);
 
     // Generate normal PNG icon for all platforms
+    const size = Math.round(icon.size);
     await sharp(svgPath)
-      .resize(icon.size, icon.size, {
+      .resize(size, size, {
         fit: 'contain',
         background: { r: 0, g: 0, b: 0, alpha: 0 },
       })

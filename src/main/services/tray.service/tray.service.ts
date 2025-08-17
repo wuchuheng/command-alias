@@ -61,10 +61,10 @@ function createTrayIcon(): Electron.NativeImage | null {
   let iconPath: string;
 
   const trayIconNames = {
-    darwin: 'assets/genLogo/tray/tray-icon-darwin-22x22.png',
-    win32: 'assets/genLogo/tray/tray-icon-win32-16x16.png',
-    linux: 'assets/genLogo/tray/tray-icon-linux-22x22.png',
-    universal: 'assets/genLogo/tray/tray-icon-22x22.png',
+    darwin: 'assets/genLogo/tray/tray.png',
+    win32: 'assets/genLogo/tray/tray.png',
+    linux: 'assets/genLogo/tray/tray.png',
+    universal: 'assets/genLogo/tray/tray.png',
   };
 
   if (app.isPackaged) {
