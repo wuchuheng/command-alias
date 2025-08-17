@@ -1,4 +1,4 @@
-import { app } from 'electron';
+import { app, nativeImage } from 'electron';
 import { setupAllIpcHandlers } from './ipc';
 import { bootload } from './services/bootload.service';
 import { initDB } from './database/data-source';
@@ -7,6 +7,7 @@ import { createTray } from './services/tray.service/tray.service';
 
 import { logger } from './utils/logger';
 import * as mainWindowService from '@/main/services/mainWindowManager.service';
+import { platform } from 'node:os';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -44,3 +45,11 @@ app.on('will-quit', () => globalHotKey.unregisterCtrlSpaceHandler());
 app.on('activate', () => {
   logger.info('Application activated');
 });
+
+if (platform() === 'darwin') {
+  const icon = app.isPackaged
+    ? process.resourcesPath + 'assets/genLogo/icon.png'
+    : 'src/renderer/assets/genLogo/icon.png';
+  const image = nativeImage.createFromPath(icon);
+  app.dock.setIcon(image);
+}

@@ -16,14 +16,9 @@ export const createWindow = (): BrowserWindow => {
     logger.info(`Creating BrowserWindow with preload path: ${MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY}`);
     logger.info(`Main window entry: ${MAIN_WINDOW_WEBPACK_ENTRY}`);
 
-    const icon = app.isPackaged
-      ? process.resourcesPath + 'assets/genLogo/icon.png'
-      : 'src/renderer/assets/genLogo/icon.png';
-
     const mainWindow = new BrowserWindow({
       height: 800 * 0.7,
       width: 1200 * 0.7,
-      icon,
       webPreferences: {
         preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
         contextIsolation: true,
