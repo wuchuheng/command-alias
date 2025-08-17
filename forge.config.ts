@@ -27,7 +27,7 @@ const config: ForgeConfig = {
   rebuildConfig: {},
   makers: [
     new MakerSquirrel({ setupIcon: path.join(iconDir, 'icon.ico') }),
-    new MakerZIP({}, ['darwin', 'win32']),
+    new MakerZIP({}, ['darwin', 'win32', 'linux']),
     new MakerDMG({ icon: path.join(iconDir, 'icon.icns') }),
     new MakerRpm({ options: { icon: path.join(iconDir, 'icon.png') } }),
     new MakerDeb({ options: { icon: path.join(iconDir, 'icon.png') } }),

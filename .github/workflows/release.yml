@@ -10,11 +10,12 @@ on:
 
 jobs:
   wind32:
-    name: Build and Release
+    name: Build windows maker file.
     runs-on: windows-latest
+    timeout-minutes: 5 
     # strategy:
     #   matrix:
-    #     platform: [windows-latest, macos-latest, ubuntu-latest]
+    #     platform: [macos-latest, ubuntu-latest]
     
     steps:
       - name: Checkout code
@@ -33,16 +34,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # - name: Upload artifacts
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: spaceboot-${{ matrix.platform }}
-      #     path: |
-      #       out/make/*.zip
-      #       out/make/*.dmg
-      #       out/make/*.deb
-      #       out/make/*.rpm
-      #       out/make/*.AppImage
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Command-alias
+          path: |
+            out/make/*.zip
+            out/make/*.exe
 
       # - name: Create Release
       #   if: matrix.platform == 'ubuntu-latest'
@@ -57,3 +55,8 @@ jobs:
       #       out/make/*.deb
       #       out/make/*.rpm
       #       out/make/*.AppImage
+
+            # out/make/*.dmg
+            # out/make/*.deb
+            # out/make/*.rpm
+            # out/make/*.AppImage
