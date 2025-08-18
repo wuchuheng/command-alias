@@ -16,6 +16,10 @@ AliasLauncher is a cross-platform keyboard shortcut launcher inspired by macOS's
 
 ## Features
 
+<p align='center'>
+<video src="./src/renderer/assets/example.mp4" controls width="800"  />
+</p>
+
 - **Key Alias Binding**: Map custom keyboard aliases to applications or commands.
 - **Cross-Platform Support**: Works on Windows, macOS, and Linux.
 - **Real-Time Feedback**: Visual indication during key alias entry.
@@ -44,10 +48,6 @@ AliasLauncher is a cross-platform keyboard shortcut launcher inspired by macOS's
 - Minimalist overlay for command selection.
 - Real-time filtering as user types alias.
 - Displays matches and executes on completion.
-
-#### Example Trigger Panel
-
-![Trigger Panel](./src/renderer/assets/example.png)
 
 ## Data Model
 
